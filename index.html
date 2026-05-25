@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablica Taktyczna</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1150px;
+            width: 100%;
+        }
+        .sidebar {
+            width: 280px;
+            background-color: #1e293b;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 550px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+        }
+        .sidebar h3 { margin-top: 15px; margin-bottom: 8px; border-bottom: 1px solid #475569; padding-bottom: 5px; font-size: 14px; color: #38bdf8; }
+        .sidebar h3:first-child { margin-top: 0; }
+        .player-list-item {
+            padding: 6px 10px;
+            margin: 4px 0;
+            background-color: #334155;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .player-list-item:hover { background-color: #2563eb; }
+        .pos-badge { font-size: 10px; background: #475569; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
+        
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #1d4ed8; }
+        #download-btn { background-color: #16a34a; }
+        #download-btn:hover { background-color: #15803d; }
+        
+        .pitch-container {
+            position: relative;
+            width: 800px;
+            height: 550px;
+            background-color: #557a46;
+            border: 4px solid #ffffff;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        .mid-line {
+            position: absolute;
+            left: 50%; top: 0; bottom: 0;
+            width: 2px; background-color: rgba(255,255,255,0.6);
+        }
+        .center-circle {
+            position: absolute;
+            left: 50%; top: 50%;
+            width: 120px; height: 120px;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .penalty-area-left {
+            position: absolute;
+            left: 0; top: 50%;
+            width: 130px; height: 260px;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-left: none;
+            transform: translateY(-50%);
+        }
+        .penalty-area-right {
+            position: absolute;
+            right: 0; top: 50%;
+            width: 130px; height: 260px;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-right: none;
+            transform: translateY(-50%);
+        }
+        
+        .player-node {
+            position: absolute;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            border: 2px solid white;
+            cursor: move;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            user-select: none;
+            z-index: 10;
+            text-align: center;
+            white-space: nowrap;
+            background-color: #1e3a8a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button id="download-btn" onclick="downloadPitch()">📸 Pobierz jako OBRAZEK (PNG)</button>
+        <button style="background-color: #ea580c;" onclick="clearPitch()">Wyczyść boisko</button>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <h3>Bramkarze (BR)</h3>
+            <div class="player-list-item" onclick="addPlayer('A. Boukemouche', 'BR')"><span>Amine Boukemouche</span><span class="pos-badge">BR</span></div>
+            <div class="player-list-item" onclick="addPlayer('A. Delplace', 'BR')"><span>Adam Delplace</span><span class="pos-badge">BR</span></div>
+            <div class="player-list-item" onclick="addPlayer('D. Lefranc-Yeboah', 'BR')"><span>Daïvy Lefranc-Yeboah</span><span class="pos-badge">BR</span></div>
+            <div class="player-list-item" onclick="addPlayer('N. Caramel', 'BR')"><span>Nicolas Caramel</span><span class="pos-badge">BR</span></div>
+            <div class="player-list-item" onclick="addPlayer('A. Roullier', 'BR')"><span>Alec Roullier</span><span class="pos-badge">BR</span></div>
+
+            <h3>Obrońcy (ŚO / LO / PO)</h3>
+            <div class="player-list-item" onclick="addPlayer('S. Fortes', 'ŚO')"><span>Steven Fortes</span><span class="pos-badge">ŚO</span></div>
+            <div class="player-list-item" onclick="addPlayer('M. Sissoko', 'ŚO')"><span>Mustapha Sissoko</span><span class="pos-badge">ŚO</span></div>
+            <div class="player-list-item" onclick="addPlayer('N. Bouyahmed', 'ŚO')"><span>Nasser Bouyahmed</span><span class="pos-badge">ŚO</span></div>
+            <div class="player-list-item" onclick="addPlayer('E. Mendy', 'ŚO')"><span>Ellijah Mendy</span><span class="pos-badge">ŚO</span></div>
+            <div class="player-list-item" onclick="addPlayer('N. Boissé', 'ŚO')"><span>Noa Boissé</span><span class="pos-badge">ŚO</span></div>
+            <div class="player-list-item" onclick="addPlayer('L. Cormier', 'ŚO')"><span>Leny Cormier</span><span class="pos-badge">ŚO</span></div>
+            <div class="player-list-item" onclick="addPlayer('R. Boukadida', 'ŚO')"><span>Rayan Boukadida</span><span class="pos-badge">ŚO</span></div>
+            <div class="player-list-item" onclick="addPlayer('Y. Kloufi', 'ŚO')"><span>Younes Kloufi</span><span class="pos-badge">ŚO</span></div>
+            <div class="player-list-item" onclick="addPlayer('G. Huet', 'ŚO')"><span>Gatien Huet</span><span class="pos-badge">ŚO</span></div>
+            <div class="player-list-item" onclick="addPlayer('O. Lenne', 'LO')"><span>Oscar Lenne</span><span class="pos-badge">LO</span></div>
+            <div class="player-list-item" onclick="addPlayer('M. Escouflaire', 'LO')"><span>Mattéo Escouflaire</span><span class="pos-badge">LO</span></div>
+            <div class="player-list-item" onclick="addPlayer('K. Koumous', 'LO')"><span>Ken Koumous</span><span class="pos-badge">LO</span></div>
+            <div class="player-list-item" onclick="addPlayer('T. Letellier', 'LO')"><span>Trévor Letellier</span><span class="pos-badge">LO</span></div>
+            <div class="player-list-item" onclick="addPlayer('Y. Ebalard', 'LO')"><span>Yannick Ebalard</span><span class="pos-badge">LO</span></div>
+            <div class="player-list-item" onclick="addPlayer('M. Gaudin', 'LO')"><span>Mathis Gaudin</span><span class="pos-badge">LO</span></div>
+            <div class="player-list-item" onclick="addPlayer('Y. Madi', 'PO')"><span>Ymraan Madi</span><span class="pos-badge">PO</span></div>
+
+            <h3>Pomocnicy (ŚPD / ŚP / ŚPO)</h3>
+            <div class="player-list-item" onclick="addPlayer('L. Robbe', 'ŚPD')"><span>Lucas Robbe</span><span class="pos-badge">ŚPD</span></div>
+            <div class="player-list-item" onclick="addPlayer('L. Videira', 'ŚPD')"><span>Lenny Videira</span><span class="pos-badge">ŚPD</span></div>
+            <div class="player-list-item" onclick="addPlayer('Y. Daoud', 'ŚPD')"><span>Yanis Daoud</span><span class="pos-badge">ŚPD</span></div>
+            <div class="player-list-item" onclick="addPlayer('A. Bah', 'ŚP')"><span>Alpha Bah</span><span class="pos-badge">ŚP</span></div>
+            <div class="player-list-item" onclick="addPlayer('L. Joursky', 'ŚP')"><span>Leopold Joursky</span><span class="pos-badge">ŚP</span></div>
+            <div class="player-list-item" onclick="addPlayer('I. Hammoudi', 'ŚP')"><span>Izhak Hammoudi</span><span class="pos-badge">ŚP</span></div>
+            <div class="player-list-item" onclick="addPlayer('I. Aouad', 'ŚPO')"><span>Ismaël Aouad</span><span class="pos-badge">ŚPO</span></div>
+            <div class="player-list-item" onclick="addPlayer('I. Ducourtioux', 'ŚPO')"><span>Ilan Ducourtioux</span><span class="pos-badge">ŚPO</span></div>
+            <div class="player-list-item" onclick="addPlayer('T. Caro', 'ŚPO')"><span>Tituan Caro</span><span class="pos-badge">ŚPO</span></div>
+            <div class="player-list-item" onclick="addPlayer('S. Barakat', 'ŚPO')"><span>Sacha Barakat</span><span class="pos-badge">ŚPO</span></div>
+            <div class="player-list-item" onclick="addPlayer('N. Adamé', 'ŚPO')"><span>Niyad Adamé</span><span class="pos-badge">ŚPO</span></div>
+
+            <h3>Napastnicy (N / LN / PN)</h3>
+            <div class="player-list-item" onclick="addPlayer('M. Seddik', 'LN')"><span>Mohamed Seddik</span><span class="pos-badge">LN</span></div>
+            <div class="player-list-item" onclick="addPlayer('S. Dié', 'ŚN')"><span>Samuel Dié</span><span class="pos-badge">ŚN</span></div>
+            <div class="player-list-item" onclick="addPlayer('P. Rolland', 'N')"><span>Paul Rolland</span><span class="pos-badge">N</span></div>
+            <div class="player-list-item" onclick="addPlayer('J. Kadidi', 'PN')"><span>Junior Kadidi</span><span class="pos-badge">PN</span></div>
+            <div class="player-list-item" onclick="addPlayer('T. Franquet', 'PN')"><span>Tayson Franquet</span><span class="pos-badge">PN</span></div>
+            <div class="player-list-item" onclick="addPlayer('A. Stiouet', 'ŚN')"><span>Ayoub Stiouet</span><span class="pos-badge">ŚN</span></div>
+            <div class="player-list-item" onclick="addPlayer('N. Vincent', 'ŚN')"><span>Noah Vincent</span><span class="pos-badge">ŚN</span></div>
+        </div>
+
+        <div class="pitch-container" id="pitch">
+            <div class="mid-line"></div>
+            <div class="center-circle"></div>
+            <div class="penalty-area-left"></div>
+            <div class="penalty-area-right"></div>
+        </div>
+    </div>
+
+    <script>
+        const pitch = document.getElementById('pitch');
+        let activePlayer = null;
+
+        function addPlayer(name, pos) {
+            const player = document.createElement('div');
+            player.className = 'player-node';
+            player.style.left = '400px';
+            player.style.top = '275px';
+            player.innerHTML = `${name} (${pos})`;
+            
+            player.addEventListener('dblclick', () => player.remove());
+            pitch.appendChild(player);
+        }
+
+        function clearPitch() {
+            document.querySelectorAll('.player-node').forEach(p => p.remove());
+        }
+
+        pitch.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('player-node')) activePlayer = e.target;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!activePlayer) return;
+            const rect = pitch.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+
+            if(x < 0) x = 0; if(x > 800) x = 800;
+            if(y < 0) y = 0; if(y > 550) y = 550;
+
+            activePlayer.style.left = x + 'px';
+            activePlayer.style.top = y + 'px';
+        });
+
+        window.addEventListener('mouseup', () => activePlayer = null);
+
+        // FUNKCJA GENERUJĄCA I POBIERAJĄCA CZYSTY OBRAZEK BOISKA
+        function downloadPitch() {
+            // Przechwytuje tylko element #pitch (boisko z tokenami), ignorując resztę strony
+            html2canvas(document.getElementById('pitch')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'taktyka.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
+</body>
+              </html>
