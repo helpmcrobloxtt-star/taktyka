@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>Profesjonalna Tablica Taktyczna (Pion/Poziom)</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden; /* Blokada przewijania strony przy rysowaniu */
+        }
+
+        /* Pasek narzędzi na górze */
+        .toolbar {
+            width: 100%;
+            background-color: #161b22;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            border-bottom: 2px solid #30363d;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 100;
+        }
+
+        button {
+            background-color: #21262d;
+            color: white;
+            border: 1px solid #30363d;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        button:hover { background-color: #30363d; }
+        button.active { background-color: #238636; border-color: #2ea44f; }
+        .btn-danger { background-color: #82071e; }
+        .btn-danger:hover { background-color: #a40a22; }
+
+        /* Kontener na boisko - POZIOMO na full screen */
+        .pitch-container {
+            position: relative;
+            width: 100vw; /* Pełna szerokość ekranu */
+            height: calc(100vh - 120px); /* Reszta wysokości minus pasek */
+            background-color: #344a2b; /* Odcień zieleni */
+            border: 3px solid #ffffff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            touch-action: none; /* Blokada natywnych gestów przeglądarki przy rysowaniu */
+        }
+
+        /* Linie boiska (SVG na pełnym kontenerze) */
+        .pitch-lines-svg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* Kliknięcia przechodzą przez linie */
+        }
+        .pitch-lines-svg path, .pitch-lines-svg circle, .pitch-lines-svg rect {
+            fill: none;
+            stroke: rgba(255,255,255,0.7);
+            stroke-width: 2;
+        }
+
+        /* Warstwa na rysowane linie */
+        #drawing-svg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
+        }
+
+        /* Warstwa na tokeny zawodników i kształty */
+        .elements-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 20;
+        }
+
+        /* STYLe dla TOKENÓW */
+        .draggable {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            touch-action: none; /* Drag and drop na dotyk */
+            transform: translate(-50%, -50%); /* Wyśrodkowanie */
+        }
+
+        /* Zawodnik kółeczko */
+        .player-node {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            z-index: 50;
+        }
+        .player-red { background-color: #82071e; }
+        .player-blue { background-color: #0d4ed8; }
+
+        /* Piłka */
+        .ball-node {
+            width: 20px; height: 20px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            border: 2px solid #000000;
+            z-index: 40;
+        }
+
+        /* STREFY i KSZTAŁTY */
+        .tactical-zone {
+            position: absolute;
+            border: 2px dashed #facc15; /* Żółty */
+            background-color: rgba(250, 204, 21, 0.15);
+            pointer-events: none; /* Nieblokuje zawodników */
+            display: none;
+        }
+        .shape {
+            position: absolute;
+            border: 2px solid #ffffff;
+            background-color: rgba(255,255,255,0.1);
+        }
+        .shape-rect { width: 100px; height: 100px; }
+        .shape-circle { width: 100px; height: 100px; border-radius: 50%; }
+
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <button onclick="setTool('draw')">✏️ Linie</button>
+        <button onclick="setTool('run')">➖ Biegi</button>
+        <button onclick="setTool('arrow')">↗️ Strzałki</button>
+        <button style="color: #4ac7f8" onclick="setDrawColor('#4ac7f8')">Niebieski</button>
+        <button style="color: #f85149" onclick="setDrawColor('#f85149')">Czerwony</button>
+        <button style="color: #ffffff" onclick="setDrawColor('#ffffff')">Biały</button>
+        <button onclick="addTeam('blue')">🔵 11 Niebieskich</button>
+        <button onclick="addTeam('red')">🔴 11 Czerwonych</button>
+        <button onclick="addBall()">⚽ Piłka</button>
+        <button onclick="toggleZone()">Zone 14</button>
+        <button onclick="clearDrawings()">🧹 Wyczyść linie</button>
+        <button class="btn-danger" onclick="resetPage()">⚠️ Reset wszystkiego</button>
+    </div>
+
+    <div class="pitch-container" id="pitch">
+        <svg class="pitch-lines-svg" viewBox="0 0 100 66" preserveAspectRatio="none">
+            <rect x="0.5" y="0.5" width="99" height="65" />
+            <path d="M 50 0.5 v 65" />
+            <circle cx="50" cy="33" r="9.15" />
+            <path d="M 0.5 16.5 v 33 h 16.5 v -33 Z" />
+            <path d="M 0.5 24.5 v 17.5 h 5.5 v -17.5 Z" />
+            <path d="M 99.5 16.5 v 33 h -16.5 v -33 Z" />
+            <path d="M 99.5 24.5 v 17.5 h -5.5 v -17.5 Z" />
+        </svg>
+
+        <svg id="drawing-svg"></svg>
+
+        <div id="zone14" class="tactical-zone" style="left: 60%; top: 25%; width: 23.5%; height: 50%;"></div>
+
+        <div class="elements-container" id="elements"></div>
+    </div>
+
+    <script>
+        // Dane aplikacji
+        const pitch = document.getElementById('pitch');
+        const elementsContainer = document.getElementById('elements');
+        const drawingSvg = document.getElementById('drawing-svg');
+        let currentTool = null; // 'draw', 'run', 'arrow'
+        let drawColor = '#4ac7f8'; // Niebieski domyślny
+
+        // FUNKCJA: Ustaw narzędzie do rysowania
+        function setTool(tool) {
+            currentTool = tool;
+            // Oznacz przycisk jako aktywny
+            document.querySelectorAll('.toolbar button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // FUNKCJA: Ustaw kolor rysowania
+        function setDrawColor(color) {
+            drawColor = color;
+        }
+
+        // FUNKCJA: Dodaj zawodników (11 w wybranym kolorze)
+        function addTeam(color) {
+            for (let i = 1; i <= 11; i++) {
+                const player = document.createElement('div');
+                player.className = `draggable player-node player-${color}`;
+                player.innerHTML = i;
+                player.style.left = `${10 + (i-1)*7}vw`;
+                player.style.top = (color === 'red') ? '15vh' : '75vh';
+                addDragBehavior(player);
+                elementsContainer.appendChild(player);
+            }
+        }
+
+        // FUNKCJA: Dodaj piłkę
+        function addBall() {
+            const ball = document.createElement('div');
+            ball.className = 'draggable ball-node';
+            ball.style.left = '50%';
+            ball.style.top = '50%';
+            addDragBehavior(ball);
+            elementsContainer.appendChild(ball);
+        }
+
+        // FUNKCJA: Zone 14
+        function toggleZone() {
+            const zone = document.getElementById('zone14');
+            zone.style.display = zone.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // FUNKCJA: Czyszczenie rysunków
+        function clearDrawings() {
+            drawingSvg.innerHTML = '';
+        }
+
+        // FUNKCJA: Reset wszystkiego
+        function resetPage() {
+            clearDrawings();
+            elementsContainer.innerHTML = '';
+            document.getElementById('zone14').style.display = 'none';
+        }
+
+
+        // --- MECHANIKA DRAG & DROP (Kompatybilna z DOTYKIEM) ---
+        function addDragBehavior(element) {
+            let initialX;
+            let initialY;
+            let currentX;
+            let currentY;
+            let active = false;
+
+            // Dotyk
+            element.addEventListener("touchstart", dragStart, false);
+            window.addEventListener("touchend", dragEnd, false);
+            window.addEventListener("touchmove", drag, false);
+            // Myszka
+            element.addEventListener("mousedown", dragStart, false);
+            window.addEventListener("mouseup", dragEnd, false);
+            window.addEventListener("mousemove", drag, false);
+
+            function dragStart(e) {
+                active = true;
+                if (e.type === "touchstart") {
+                    initialX = e.touches[0].clientX - element.offsetLeft;
+                    initialY = e.touches[0].clientY - element.offsetTop;
+                } else {
+                    initialX = e.clientX - element.offsetLeft;
+                    initialY = e.clientY - element.offsetTop;
+                }
+            }
+
+            function dragEnd() { active = false; }
+
+            function drag(e) {
+                if (!active) return;
+                // e.preventDefault(); // Blokada przesuwania strony przy dotyku na elemencie
+
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+
+                element.style.left = currentX + "px";
+                element.style.top = currentY + "px";
+            }
+        }
+
+
+        // --- MECHANIKA RYSOWANIA (Kompatybilna z DOTYKIEM) ---
+        let isDrawing = false;
+        let startPoint = null;
+        let currentDrawingElement = null;
+
+        pitch.addEventListener("touchstart", drawingStart, false);
+        window.addEventListener("touchend", drawingEnd, false);
+        window.addEventListener("touchmove", drawingMove, false);
+        pitch.addEventListener("mousedown", drawingStart, false);
+        window.addEventListener("mouseup", drawingEnd, false);
+        window.addEventListener("mousemove", drawingMove, false);
+
+        function getMousePos(e) {
+            const rect = pitch.getBoundingClientRect();
+            let x, y;
+            if (e.type.startsWith('touch')) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+            return { x: (x / rect.width) * 100, y: (y / rect.height) * 100 }; // Pozycje w %
+        }
+
+        function drawingStart(e) {
+            if (!currentTool) return;
+            // Blokada rysowania na tokenach
+            if (e.target.classList.contains('draggable')) return;
+
+            isDrawing = true;
+            startPoint = getMousePos(e);
+
+            if (currentTool === 'draw' || currentTool === 'run') {
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${startPoint.x} ${startPoint.y}`);
+                path.setAttribute("stroke", drawColor);
+                path.setAttribute("stroke-width", currentTool === 'draw' ? "0.3" : "0.2");
+                path.setAttribute("fill", "none");
+                if (currentTool === 'run') path.setAttribute("stroke-dasharray", "0.5, 0.5");
+                drawingSvg.appendChild(path);
+                currentDrawingElement = path;
+            } else if (currentTool === 'arrow') {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", startPoint.x);
+                line.setAttribute("y1", startPoint.y);
+                line.setAttribute("x2", startPoint.x);
+                line.setAttribute("y2", startPoint.y);
+                line.setAttribute("stroke", drawColor);
+                line.setAttribute("stroke-width", "0.3");
+                // Dodaj grot strzałki
+                currentDrawingElement = line;
+                drawingSvg.appendChild(line);
+            }
+        }
+
+        function drawingEnd() {
+            isDrawing = false;
+            currentDrawingElement = null;
+        }
+
+        function drawingMove(e) {
+            if (!isDrawing || !currentDrawingElement) return;
+
+            const currentPoint = getMousePos(e);
+
+            if (currentTool === 'draw' || currentTool === 'run') {
+                const d = currentDrawingElement.getAttribute("d");
+                currentDrawingElement.setAttribute("d", `${d} L ${currentPoint.x} ${currentPoint.y}`);
+            } else if (currentTool === 'arrow') {
+                currentDrawingElement.setAttribute("x2", currentPoint.x);
+                currentDrawingElement.setAttribute("y2", currentPoint.y);
+            }
+        }
+    </script>
+</body>
+  </html>
