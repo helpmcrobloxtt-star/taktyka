@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Tablic Taktycznych</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #1d4ed8; }
+        #copy-btn { background-color: #16a34a; }
+        #copy-btn:hover { background-color: #15803d; }
+        
+        .pitch-container {
+            position: relative;
+            width: 800px;
+            height: 530px;
+            background-color: #557a46;
+            border: 4px solid #ffffff;
+            overflow: hidden;
+        }
+        /* Linie boiska */
+        .mid-line {
+            position: absolute;
+            left: 50%; top: 0; bottom: 0;
+            width: 2px; background-color: rgba(255,255,255,0.6);
+        }
+        .center-circle {
+            position: absolute;
+            left: 50%; top: 50%;
+            width: 120px; height: 120px;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .penalty-area-left {
+            position: absolute;
+            left: 0; top: 50%;
+            width: 130px; height: 260px;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-left: none;
+            transform: translateY(-50%);
+        }
+        .penalty-area-right {
+            position: absolute;
+            right: 0; top: 50%;
+            width: 130px; height: 260px;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-right: none;
+            transform: translateY(-50%);
+        }
+        /* Podświetlana strefa (np. Zone 14) */
+        .tactical-zone {
+            position: absolute;
+            border: 2px dashed #38bdf8;
+            background-color: rgba(56, 189, 248, 0.2);
+            pointer-events: none;
+            display: none;
+        }
+        /* Zawodnik (token) */
+        .player-node {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            border: 2px solid white;
+            cursor: move;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            user-select: none;
+            z-index: 10;
+        }
+        .team-blue { background-color: #1d4ed8; }
+        .team-red { background-color: #b91c1c; }
+        
+        svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button id="zone-btn" onclick="toggleZone()">Pokaż/Ukryj Zone 14</button>
+        <button id="copy-btn" onclick="generateShareableLink()">🔗 Kopiuj link do taktyki</button>
+    </div>
+
+    <div class="pitch-container" id="pitch">
+        <div class="mid-line"></div>
+        <div class="center-circle"></div>
+        <div class="penalty-area-left"></div>
+        <div class="penalty-area-right"></div>
+        
+        <div id="zone14" class="tactical-zone" style="left: 490px; top: 150px; width: 140px; height: 230px; display: block;"></div>
+        
+        <svg id="arrows-svg">
+            <defs>
+                <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L6,3 Z" fill="#38bdf8" />
+                </marker>
+                <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L6,3 Z" fill="#f87171" />
+                </marker>
+            </defs>
+            <line x1="420" y1="270" x2="520" y2="295" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow-blue)" />
+            <line x1="560" y1="130" x2="620" y2="180" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow-blue)" />
+        </svg>
+
+        <div class="player-node team-blue" style="left: 420px; top: 270px;">6</div>
+        <div class="player-node team-blue" style="left: 490px; top: 210px;">8</div>
+        <div class="player-node team-blue" style="left: 520px; top: 295px;">9</div>
+        <div class="player-node team-blue" style="left: 610px; top: 240px;">10</div>
+        <div class="player-node team-blue" style="left: 490px; top: 95px;">5</div>
+        <div class="player-node team-blue" style="left: 490px; top: 435px;">4</div>
+        <div class="player-node team-red" style="left: 540px; top: 240px;">11</div>
+        <div class="player-node team-red" style="left: 570px; top: 300px;">7</div>
+        <div class="player-node team-red" style="left: 650px; top: 280px;">6</div>
+        <div class="player-node team-red" style="left: 640px; top: 215px;">3</div>
+    </div>
+
+    <script>
+        // Funkcja włączania/wyłączania strefy
+        function toggleZone() {
+            const zone = document.getElementById('zone14');
+            zone.style.display = zone.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Obsługa przeciągania zawodników myszką (Drag and Drop)
+        const pitch = document.getElementById('pitch');
+        let activePlayer = null;
+
+        pitch.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('player-node')) {
+                activePlayer = e.target;
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!activePlayer) return;
+            const rect = pitch.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+
+            // Blokada wyjścia poza boisko
+            if(x < 0) x = 0; if(x > 800) x = 800;
+            if(y < 0) y = 0; if(y > 530) y = 530;
+
+            activePlayer.style.left = x + 'px';
+            activePlayer.style.top = y + 'px';
+        });
+
+        window.addEventListener('mouseup', () => {
+            activePlayer = null;
+        });
+
+        // GENERATOR LINKU (Pakowanie pozycji do URL)
+        function generateShareableLink() {
+            const players = document.querySelectorAll('.player-node');
+            const positions = [];
+
+            players.forEach((player, index) => {
+                positions.push({
+                    id: index,
+                    x: player.style.left,
+                    y: player.style.top
+                });
+            });
+
+            // Szyfrowanie danych układu do formatu tekstowego bezpiecznego dla URL
+            const encryptedData = btoa(JSON.stringify(positions));
+            const shareableUrl = window.location.origin + window.location.pathname + '#' + encryptedData;
+
+            // Kopiowanie gotowego linku do schowka
+            navigator.clipboard.writeText(shareableUrl).then(() => {
+                alert('Skopiowano link do schowka! Możesz go teraz wysłać komuś, a zobaczy dokładnie Twój układ boiska.');
+            });
+        }
+
+        // ODCZYTYWANIE LINKU (Uruchamia się przy otwarciu strony z hashem)
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.location.hash) {
+                try {
+                    const hashData = window.location.hash.substring(1);
+                    const decodedPositions = JSON.parse(atob(hashData));
+                    const players = document.querySelectorAll('.player-node');
+
+                    decodedPositions.forEach((pos, index) => {
+                        if (players[index]) {
+                            players[index].style.left = pos.x;
+                            players[index].style.top = pos.y;
+                        }
+                    });
+                } catch (e) {
+                    console.error('Błąd podczas wczytywania układu z linku', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
