@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablica Taktyczna Pro - Discord RP</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background-color: #1e293b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            max-width: 95vw;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        button, .btn-link {
+            background-color: #334155;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        button:hover, .btn-link:hover {
+            background-color: #475569;
+        }
+
+        button.active {
+            background-color: #2563eb !important;
+            outline: 2px solid #38bdf8;
+        }
+
+        .btn-danger {
+            background-color: #991b1b;
+        }
+        .btn-danger:hover {
+            background-color: #7f1d1d;
+        }
+
+        .pitch-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 100 / 62.5;
+            background-color: #4c7843;
+            border: 4px solid white;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            touch-action: none;
+        }
+
+        .pitch-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .pitch-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .zone14 {
+            position: absolute;
+            top: 21%;
+            left: 56.5%;
+            width: 26.5%;
+            height: 58%;
+            background-color: rgba(56, 189, 248, 0.25);
+            border: 2px dashed #38bdf8;
+            z-index: 2;
+            display: none;
+            pointer-events: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #38bdf8;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #drawing-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: auto;
+        }
+
+        .player {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            cursor: move;
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            user-select: none;
+            border: 2px solid white;
+            transform: translate(-50%, -50%);
+        }
+
+        .player.blue { background-color: #2563eb; }
+        .player.red { background-color: #dc2626; }
+        .player.white { background-color: #ffffff; color: #000000; border: 2px solid #000000; }
+
+        .ball {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 50%;
+            cursor: move;
+            z-index: 11;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            transform: translate(-50%, -50%);
+        }
+
+        .ball::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, transparent, transparent 3px, #000 3px, #000 6px);
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <button id="btn-draw" onclick="setTool('draw', this)">✏️ Linie</button>
+        <button id="btn-run" onclick="setTool('run', this)">== Biegi</button>
+        <button id="btn-arrow" onclick="setTool('arrow', this)">↗️ Strzałki</button>
+        
+        <button style="border-bottom: 3px solid #2563eb;" onclick="spawnTeam('blue')">🔵 +11 Niebieskich</button>
+        <button style="border-bottom: 3px solid #dc2626;" onclick="spawnTeam('red')">🔴 +11 Czerwonych</button>
+        <button style="border-bottom: 3px solid #ffffff;" onclick="spawnTeam('white')">⚪ +1 Biały</button>
+        <button onclick="spawnBall()">⚽ Piłka</button>
+        
+        <button onclick="toggleZone14()">Strefa 14</button>
+        <button onclick="clearLines()">🧹 Linie</button>
+        <button class="btn-danger" onclick="clearAll()">⚠️ Reset</button>
+        
+        <a href="liga.html" class="btn-link" style="background-color: #7c3aed;">🏆 Liga i Terminarz</a>
+    </div>
+
+    <div class="pitch-wrapper" id="pitch-field">
+        <div class="pitch-container" id="tactical-board">
+            <svg class="pitch-svg" viewBox="0 0 100 62.5">
+                <rect x="0" y="0" width="100" height="62.5" fill="#4c7843" />
+                <g fill="#436a3c">
+                    <rect x="10" y="0" width="10" height="62.5" />
+                    <rect x="30" y="0" width="10" height="62.5" />
+                    <rect x="50" y="0" width="10" height="62.5" />
+                    <rect x="70" y="0" width="10" height="62.5" />
+                    <rect x="90" y="0" width="10" height="62.5" />
+                </g>
+                <g fill="none" stroke="white" stroke-width="0.6">
+                    <rect x="0.5" y="0.5" width="99" height="61.5" />
+                    <line x1="50" y1="0.5" x2="50" y2="62" />
+                    <circle cx="50" cy="31.25" r="9.15" />
+                    <circle cx="50" cy="31.25" r="0.5" fill="white" />
+                    <rect x="0.5" y="13.125" width="16.5" height="36.25" />
+                    <rect x="0.5" y="22.25" width="5.5" height="18" />
+                    <circle cx="11" cy="31.25" r="0.5" fill="white" />
+                    <path d="M 17 25 A 9.15 9.15 0 0 1 17 37.5" />
+                    <rect x="83" y="13.125" width="16.5" height="36.25" />
+                    <rect x="94" y="22.25" width="5.5" height="18" />
+                    <circle cx="89" cy="31.25" r="0.5" fill="white" />
+                    <path d="M 83 25 A 9.15 9.15 0 0 0 83 37.5" />
+                </g>
+            </svg>
+        </div>
+
+        <div class="zone14" id="zone-14-layer">Strefa 14</div>
+
+        <svg id="drawing-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+                <marker id="arrowhead" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
+                </marker>
+            </defs>
+        </svg>
+    </div>
+
+    <script>
+        const pitch = document.getElementById('pitch-field');
+        const drawingSvg = document.getElementById('drawing-svg');
+        let currentTool = null;
+        let isDrawing = false;
+        let startX = 0, startY = 0;
+        let currentElement = null;
+
+        function setTool(tool, btn) {
+            document.querySelectorAll('.toolbar button').forEach(b => b.classList.remove('active'));
+            if (currentTool === tool) {
+                currentTool = null;
+            } else {
+                currentTool = tool;
+                btn.classList.add('active');
+            }
+        }
+
+        function toggleZone14() {
+            const zone = document.getElementById('zone-14-layer');
+            zone.style.display = (zone.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function clearLines() {
+            const lines = drawingSvg.querySelectorAll('line, path');
+            lines.forEach(l => l.remove());
+        }
+
+        function clearAll() {
+            clearLines();
+            document.querySelectorAll('.player, .ball').forEach(el => el.remove());
+            document.getElementById('zone-14-layer').style.display = 'none';
+            currentTool = null;
+            document.querySelectorAll('.toolbar button').forEach(b => b.classList.remove('active'));
+        }
+
+        function getSvgCoords(e) {
+            const rect = pitch.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: ((clientX - rect.left) / rect.width) * 100,
+                y: ((clientY - rect.top) / rect.height) * 100
+            };
+        }
+
+        pitch.addEventListener('mousedown', startDraw);
+        pitch.addEventListener('mousemove', doDraw);
+        window.addEventListener('mouseup', endDraw);
+
+        pitch.addEventListener('touchstart', startDraw);
+        pitch.addEventListener('touchmove', doDraw);
+        window.addEventListener('touchend', endDraw);
+
+        function startDraw(e) {
+            if (!currentTool || e.target.classList.contains('player') || e.target.classList.contains('ball')) return;
+            isDrawing = true;
+            const coords = getSvgCoords(e);
+            startX = coords.x;
+            startY = coords.y;
+
+            if (currentTool === 'draw') {
+                currentElement = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                currentElement.setAttribute("x1", startX);
+                currentElement.setAttribute("y1", startY);
+                currentElement.setAttribute("x2", startX);
+                currentElement.setAttribute("y2", startY);
+                currentElement.setAttribute("stroke", "#ffffff");
+                currentElement.setAttribute("stroke-width", "0.8");
+            } else if (currentTool === 'arrow') {
+                currentElement = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                currentElement.setAttribute("x1", startX);
+                currentElement.setAttribute("y1", startY);
+                currentElement.setAttribute("x2", startX);
+                currentElement.setAttribute("y2", startY);
+                currentElement.setAttribute("stroke", "#38bdf8");
+                currentElement.setAttribute("stroke-width", "0.8");
+                currentElement.setAttribute("marker-end", "url(#arrowhead)");
+            } else if (currentTool === 'run') {
+                currentElement = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                currentElement.setAttribute("x1", startX);
+                currentElement.setAttribute("y1", startY);
+                currentElement.setAttribute("x2", startX);
+                currentElement.setAttribute("y2", startY);
+                currentElement.setAttribute("stroke", "#ffffff");
+                currentElement.setAttribute("stroke-width", "0.8");
+                currentElement.setAttribute("stroke-dasharray", "2,2");
+            }
+            drawingSvg.appendChild(currentElement);
+        }
+
+        function doDraw(e) {
+            if (!isDrawing || !currentElement) return;
+            const coords = getSvgCoords(e);
+            currentElement.setAttribute("x2", coords.x);
+            currentElement.setAttribute("y2", coords.y);
+        }
+
+        function endDraw() {
+            isDrawing = false;
+            currentElement = null;
+        }
+
+        function spawnTeam(color) {
+            const count = (color === 'white') ? 1 : 11;
+            const startY = (color === 'blue') ? 25 : (color === 'red' ? 75 : 50);
+            
+            for (let i = 1; i <= count; i++) {
+                const el = document.createElement('div');
+                el.className = `player ${color}`;
+                el.innerText = (color === 'white') ? 'R' : i;
+                el.style.left = `${5 + (i * 7.8)}%`;
+                el.style.top = `${startY}%`;
+                makeDraggable(el);
+                pitch.appendChild(el);
+            }
+        }
+
+        function spawnBall() {
+            if (document.querySelector('.ball')) return;
+            const ball = document.createElement('div');
+            ball.className = 'ball';
+            ball.style.left = '50%';
+            ball.style.top = '50%';
+            makeDraggable(ball);
+            pitch.appendChild(ball);
+        }
+
+        function makeDraggable(element) {
+            let activeDrag = false;
+
+            element.addEventListener('mousedown', dragStart);
+            element.addEventListener('touchstart', dragStart, { passive: false });
+
+            function dragStart(e) {
+                if (currentTool) return;
+                e.preventDefault();
+                activeDrag = true;
+                
+                window.addEventListener('mousemove', dragMove);
+                window.addEventListener('touchmove', dragMove, { passive: false });
+                window.addEventListener('mouseup', dragEnd);
+                window.addEventListener('touchend', dragEnd);
+            }
+
+            function dragMove(e) {
+                if (!activeDrag) return;
+                const rect = pitch.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                let x = ((clientX - rect.left) / rect.width) * 100;
+                let y = ((clientY - rect.top) / rect.height) * 100;
+
+                if (x < 0) x = 0; if (x > 100) x = 100;
+                if (y < 0) y = 0; if (y > 100) y = 100;
+
+                element.style.left = `${x}%`;
+                element.style.top = `${y}%`;
+            }
+
+            function dragEnd() {
+                activeDrag = false;
+                window.removeEventListener('mousemove', dragMove);
+                window.removeEventListener('touchmove', dragMove);
+                window.removeEventListener('mouseup', dragEnd);
+                window.removeEventListener('touchend', dragEnd);
+            }
+        }
+    </script>
+</body>
+  </html>
+  
