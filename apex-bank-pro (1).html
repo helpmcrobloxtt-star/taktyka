@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Bank Pro v5.0</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A0E1A;
+    --bg-alt: #0D1220;
+    --panel: rgba(255,255,255,0.045);
+    --panel-solid: #121729;
+    --panel-border: rgba(255,255,255,0.08);
+    --panel-hover: rgba(255,255,255,0.07);
+    --primary: #10B981;
+    --primary-dim: rgba(16,185,129,0.15);
+    --gold: #F0B93F;
+    --gold-dim: rgba(240,185,63,0.15);
+    --danger: #EF4444;
+    --danger-dim: rgba(239,68,68,0.15);
+    --info: #4B9FE1;
+    --info-dim: rgba(75,159,225,0.15);
+    --text: #E7ECF3;
+    --muted: #8B96AB;
+    --muted-dim: #5B6479;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.35);
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(16,185,129,0.10), transparent),
+      radial-gradient(ellipse 60% 50% at 100% 0%, rgba(240,185,63,0.07), transparent),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    display:flex;
+    overflow-x:hidden;
+  }
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:8px;}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2);}
+  ::selection{background:var(--primary);color:#04140D;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select{font-family:inherit;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  /* ===== LIGHT MODE ===== */
+  body.light-mode{
+    --bg:#F3F5F8;
+    --bg-alt:#EAEDF3;
+    --panel: rgba(255,255,255,0.65);
+    --panel-solid: #FFFFFF;
+    --panel-border: rgba(15,23,42,0.08);
+    --panel-hover: rgba(15,23,42,0.04);
+    --text:#131A2A;
+    --muted:#5B6479;
+    --muted-dim:#94A0B8;
+    --shadow: 0 8px 28px rgba(30,41,59,0.08);
+  }
+  body.light-mode{
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(16,185,129,0.08), transparent),
+      radial-gradient(ellipse 60% 50% at 100% 0%, rgba(240,185,63,0.10), transparent),
+      var(--bg);
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar{
+    width:230px;
+    min-width:230px;
+    height:100vh;
+    position:sticky;
+    top:0;
+    background:var(--panel-solid);
+    border-right:1px solid var(--panel-border);
+    display:flex;
+    flex-direction:column;
+    padding:22px 14px;
+    z-index:100;
+    transition:width .25s ease, min-width .25s ease;
+  }
+  .sidebar.collapsed{width:76px;min-width:76px;}
+  .sidebar.collapsed .brand-text,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .nav-section-title,
+  .sidebar.collapsed .sidebar-footer-text{display:none;}
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    padding:6px 10px 22px 10px;
+    font-family:var(--font-display);
+  }
+  .brand-mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg, var(--primary), var(--gold));
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:#04140D;font-size:16px;
+    flex-shrink:0;
+    box-shadow:0 4px 14px rgba(16,185,129,0.35);
+  }
+  .brand-text{font-size:17px;font-weight:700;letter-spacing:0.2px;white-space:nowrap;}
+  .brand-text span{color:var(--gold);}
+  .nav-section-title{
+    font-size:11px;text-transform:uppercase;letter-spacing:1px;
+    color:var(--muted-dim);margin:16px 10px 8px 10px;font-weight:600;
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:12px;
+    padding:10px 12px;border-radius:var(--radius-sm);
+    color:var(--muted);font-size:14px;font-weight:500;
+    margin-bottom:2px;transition:all .18s ease;
+    white-space:nowrap;overflow:hidden;position:relative;
+  }
+  .nav-item:hover{background:var(--panel-hover);color:var(--text);}
+  .nav-item.active{
+    background:var(--primary-dim);color:var(--primary);
+  }
+  .nav-item.active::before{
+    content:'';position:absolute;left:-14px;top:50%;transform:translateY(-50%);
+    width:4px;height:60%;background:var(--primary);border-radius:0 4px 4px 0;
+  }
+  .nav-icon{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .sidebar-footer{
+    margin-top:auto;padding-top:14px;border-top:1px solid var(--panel-border);
+    display:flex;align-items:center;gap:10px;padding-left:10px;
+  }
+  .collapse-btn{
+    width:100%;padding:8px;border:none;background:var(--panel-hover);
+    border-radius:var(--radius-sm);color:var(--muted);font-size:12px;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    margin-top:10px;
+  }
+  .collapse-btn:hover{color:var(--text);}
+
+  /* ===== MAIN LAYOUT ===== */
+  .main-wrap{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+  .topbar{
+    position:sticky;top:0;z-index:90;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 28px;
+    background:rgba(10,14,26,0.72);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--panel-border);
+    gap:16px;flex-wrap:wrap;
+  }
+  body.light-mode .topbar{background:rgba(243,245,248,0.75);}
+  .topbar-left{display:flex;align-items:center;gap:14px;}
+  .page-title{font-family:var(--font-display);font-size:20px;font-weight:700;}
+  .page-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+
+  .profile-switch{
+    display:flex;align-items:center;gap:8px;
+    background:var(--panel);border:1px solid var(--panel-border);
+    padding:6px 12px 6px 6px;border-radius:999px;
+    position:relative;
+  }
+  .avatar{
+    width:30px;height:30px;border-radius:50%;
+    background:linear-gradient(135deg,var(--info),var(--primary));
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:#fff;
+  }
+  .profile-switch select{
+    background:transparent;border:none;color:var(--text);font-size:13px;font-weight:600;
+    outline:none;appearance:none;padding-right:14px;
+  }
+
+  .pill-select{
+    background:var(--panel);border:1px solid var(--panel-border);
+    color:var(--text);padding:8px 12px;border-radius:999px;font-size:13px;font-weight:600;
+    outline:none;appearance:none;cursor:pointer;
+  }
+  .icon-btn{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--panel);border:1px solid var(--panel-border);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);position:relative;transition:all .18s ease;
+  }
+  .icon-btn:hover{color:var(--text);background:var(--panel-hover);}
+  .notif-dot{
+    position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;
+    background:var(--danger);border:2px solid var(--panel-solid);
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--primary),#0ea371);
+    color:#04140D;border:none;padding:10px 18px;border-radius:999px;
+    font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;
+    box-shadow:0 4px 16px rgba(16,185,129,0.3);transition:transform .15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-primary:active{transform:translateY(0);}
+
+  .content{padding:24px 28px 60px 28px;}
+
+  /* ===== HERO NET WORTH TICKER (SIGNATURE) ===== */
+  .hero-ticker{
+    position:relative;overflow:hidden;
+    border-radius:20px;
+    background:linear-gradient(135deg, rgba(16,185,129,0.10), rgba(240,185,63,0.05));
+    border:1px solid var(--panel-border);
+    padding:28px 32px;margin-bottom:22px;
+    display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  }
+  .hero-ticker-sparkline{position:absolute;inset:0;opacity:0.5;pointer-events:none;}
+  .hero-left{position:relative;z-index:2;}
+  .hero-label{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:600;margin-bottom:8px;}
+  .hero-value{
+    font-family:var(--font-mono);font-size:44px;font-weight:700;
+    display:flex;align-items:baseline;gap:10px;letter-spacing:-1px;
+  }
+  .hero-value .cur{font-size:22px;color:var(--muted);font-weight:500;}
+  .hero-delta{
+    display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+    font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;
+  }
+  .hero-delta.up{color:var(--primary);background:var(--primary-dim);}
+  .hero-delta.down{color:var(--danger);background:var(--danger-dim);}
+  .hero-stats{display:flex;gap:28px;position:relative;z-index:2;flex-wrap:wrap;}
+  .hero-stat{text-align:right;}
+  .hero-stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+  .hero-stat-value{font-family:var(--font-mono);font-size:18px;font-weight:600;margin-top:4px;}
+
+  /* ===== GRID / CARDS ===== */
+  .grid{display:grid;gap:18px;}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+  .grid-3{grid-template-columns:repeat(3,1fr);}
+  .grid-2{grid-template-columns:repeat(2,1fr);}
+  @media (max-width:1400px){.grid-4{grid-template-columns:repeat(2,1fr);} .grid-3{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:900px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:var(--radius);
+    padding:20px;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    transition:border-color .2s ease, transform .2s ease;
+    position:relative;
+  }
+  .card:hover{border-color:rgba(255,255,255,0.16);}
+  .card-title{font-size:13px;color:var(--muted);font-weight:600;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .card-value{font-family:var(--font-mono);font-size:26px;font-weight:700;}
+  .card-icon-badge{
+    width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  }
+  section{margin-bottom:28px;}
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .section-title{font-family:var(--font-display);font-size:18px;font-weight:700;}
+  .view{display:none;}
+  .view.active{display:block;animation:fadeIn .3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .badge{padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.3px;}
+  .badge.success{background:var(--primary-dim);color:var(--primary);}
+  .badge.danger{background:var(--danger-dim);color:var(--danger);}
+  .badge.warn{background:var(--gold-dim);color:var(--gold);}
+  .badge.info{background:var(--info-dim);color:var(--info);}
+</style>
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">A</div>
+    <div class="brand-text">Apex<span>Bank</span> Pro</div>
+  </div>
+  <div id="navContainer"></div>
+  <div class="sidebar-footer">
+    <button class="collapse-btn" id="collapseBtn">⟨⟨ <span class="sidebar-footer-text">Zwiń</span></button>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="page-title" id="pageTitle">Pulpit</div>
+        <div class="page-sub" id="pageSub">Przegląd finansów rodziny</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="profile-switch">
+        <div class="avatar" id="topAvatar">A</div>
+        <select id="profileSelect"></select>
+      </div>
+      <select class="pill-select" id="currencySelect">
+        <option value="PLN">PLN</option>
+        <option value="EUR">EUR</option>
+        <option value="USD">USD</option>
+        <option value="GBP">GBP</option>
+      </select>
+      <button class="icon-btn" id="themeToggleBtn" title="Zmień motyw">🌙</button>
+      <button class="icon-btn" id="notifBtn" title="Powiadomienia"><span class="notif-dot" id="notifDot" style="display:none;"></span>🔔</button>
+      <button class="btn-primary" id="advanceMonthBtn">⏩ Przejdź o 1 miesiąc</button>
+    </div>
+  </div>
+  <div class="content" id="contentArea">
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   APEX BANK PRO v5.0 — CZĘŚĆ 2: DATA MODEL + STATE ENGINE
+   ============================================================ */
+
+const DB_KEY = 'apexBankProDB_v5';
+const SNAPSHOT_LIMIT = 240;
+
+const CATEGORY_META = {
+  wyplata:      {label:'Wypłata',            icon:'💼', kind:'income'},
+  czynsz_najem: {label:'Czynsz z najmu',      icon:'🏠', kind:'income'},
+  dywidenda:    {label:'Dywidenda',           icon:'📈', kind:'income'},
+  odsetki:      {label:'Odsetki',             icon:'🏦', kind:'income'},
+  sprzedaz:     {label:'Sprzedaż aktywa',     icon:'💰', kind:'income'},
+  przelew_in:   {label:'Przelew przychodzący',icon:'↩️', kind:'income'},
+  bonus:        {label:'Zdarzenie losowe (+)',icon:'🎁', kind:'income'},
+  jedzenie:     {label:'Jedzenie',            icon:'🍔', kind:'expense'},
+  rachunki:     {label:'Rachunki',            icon:'🧾', kind:'expense'},
+  ubezpieczenie:{label:'Ubezpieczenie',       icon:'🛡️', kind:'expense'},
+  kredyt_rata:  {label:'Rata kredytu',        icon:'🏦', kind:'expense'},
+  inwestycja:   {label:'Zakup aktywa',        icon:'📊', kind:'expense'},
+  przelew_out:  {label:'Przelew wychodzący',  icon:'↪️', kind:'expense'},
+  kara:         {label:'Kara / opłata',       icon:'⚠️', kind:'expense'},
+  podatek:      {label:'Podatek',             icon:'🏛️', kind:'expense'},
+  zdarzenie_neg:{label:'Zdarzenie losowe (-)',icon:'💥', kind:'expense'},
+  inne:         {label:'Inne',                icon:'🔹', kind:'neutral'}
+};
+
+// Kursy walut względem PLN (ile jednostek danej waluty = 1 PLN)
+const BASE_FX_RATES = { PLN: 1, EUR: 0.2320, USD: 0.2510, GBP: 0.1980 };
+const CURRENCY_SYMBOLS = { PLN: 'zł', EUR: '€', USD: '$', GBP: '£' };
+
+const JOB_OFFERS_POOL = [
+  {id:'j1',  title:'Kasjer w markecie',            salary:3800,  successBase:0.85, sector:'Handel'},
+  {id:'j2',  title:'Kurier',                        salary:4200,  successBase:0.80, sector:'Logistyka'},
+  {id:'j3',  title:'Recepcjonista hotelowy',        salary:4100,  successBase:0.75, sector:'Usługi'},
+  {id:'j4',  title:'Programista Junior',            salary:7500,  successBase:0.55, sector:'IT'},
+  {id:'j5',  title:'Programista Mid',               salary:12500, successBase:0.35, sector:'IT'},
+  {id:'j6',  title:'Programista Senior',            salary:21000, successBase:0.18, sector:'IT'},
+  {id:'j7',  title:'Grafik komputerowy',            salary:6200,  successBase:0.55, sector:'Kreacja'},
+  {id:'j8',  title:'Księgowy',                      salary:6800,  successBase:0.50, sector:'Finanse'},
+  {id:'j9',  title:'Analityk finansowy',            salary:9800,  successBase:0.40, sector:'Finanse'},
+  {id:'j10', title:'Broker giełdowy',                salary:14500, successBase:0.25, sector:'Finanse'},
+  {id:'j11', title:'Nauczyciel',                    salary:5200,  successBase:0.65, sector:'Edukacja'},
+  {id:'j12', title:'Pielęgniarka',                  salary:6100,  successBase:0.60, sector:'Zdrowie'},
+  {id:'j13', title:'Lekarz rezydent',               salary:9500,  successBase:0.30, sector:'Zdrowie'},
+  {id:'j14', title:'Prawnik',                       salary:13500, successBase:0.28, sector:'Prawo'},
+  {id:'j15', title:'Kierowca zawodowy (kat. C+E)',  salary:5800,  successBase:0.70, sector:'Logistyka'},
+  {id:'j16', title:'Manager sprzedaży',             salary:8900,  successBase:0.45, sector:'Handel'},
+  {id:'j17', title:'Barista / kelner',              salary:3600,  successBase:0.88, sector:'Gastronomia'},
+  {id:'j18', title:'Elektryk',                      salary:6700,  successBase:0.58, sector:'Budownictwo'},
+  {id:'j19', title:'Architekt',                     salary:10800, successBase:0.32, sector:'Budownictwo'},
+  {id:'j20', title:'Youtuber / Twórca treści',      salary:4500,  successBase:0.40, sector:'Media'}
+];
+
+const CRYPTO_SEED = [
+  {sym:'BTC', name:'Bitcoin',   price:248000, vol:0.035},
+  {sym:'ETH', name:'Ethereum',  price:13200,  vol:0.040},
+  {sym:'BNB', name:'BNB',       price:2450,   vol:0.038},
+  {sym:'SOL', name:'Solana',    price:610,    vol:0.055},
+  {sym:'XRP', name:'Ripple',    price:2.30,   vol:0.050},
+  {sym:'ADA', name:'Cardano',   price:1.85,   vol:0.048},
+  {sym:'DOGE',name:'Dogecoin',  price:0.62,   vol:0.070},
+  {sym:'DOT', name:'Polkadot',  price:24.50,  vol:0.045},
+  {sym:'AVAX',name:'Avalanche', price:145,    vol:0.052},
+  {sym:'LINK',name:'Chainlink', price:58,     vol:0.046},
+  {sym:'MATIC',name:'Polygon',  price:2.10,   vol:0.050},
+  {sym:'LTC', name:'Litecoin',  price:340,    vol:0.040},
+  {sym:'ATOM',name:'Cosmos',    price:32,     vol:0.048},
+  {sym:'UNI', name:'Uniswap',   price:26,     vol:0.049},
+  {sym:'APEX',name:'ApexCoin',  price:9.80,   vol:0.090}
+];
+
+const STOCKS_SEED = [
+  {sym:'PKO',  name:'PKO BP',        price:58.40,  vol:0.018},
+  {sym:'PKN',  name:'Orlen',         price:71.20,  vol:0.020},
+  {sym:'CDR',  name:'CD Projekt',    price:112.50, vol:0.028},
+  {sym:'ALE',  name:'Allegro',       price:34.80,  vol:0.022},
+  {sym:'KGH',  name:'KGHM',          price:145.30, vol:0.024},
+  {sym:'DNP',  name:'Dino Polska',   price:398.00, vol:0.020},
+  {sym:'PZU',  name:'PZU',           price:52.10,  vol:0.016},
+  {sym:'LPP',  name:'LPP',           price:16800,  vol:0.026}
+];
+
+function defaultDB(){
+  const now = new Date();
+  const headId = 'u_head';
+  return {
+    version: 5,
+    simDate: { year: now.getFullYear(), month: now.getMonth() },
+    theme: 'dark',
+    displayCurrency: 'PLN',
+    currentUserId: headId,
+    fxRates: {...BASE_FX_RATES},
+    familyPool: { balance: 2500, history: [] },
+    market: {
+      crypto: CRYPTO_SEED.map(c => ({...c, history:[c.price]})),
+      stocks: STOCKS_SEED.map(s => ({...s, history:[s.price]})),
+      commodities: {
+        gold: {name:'Złoto (uncja)', price:9850, vol:0.012, history:[9850]},
+        oil:  {name:'Ropa (baryłka)', price:342,  vol:0.025, history:[342]}
+      }
+    },
+    jobOffersAvailable: [],
+    globalEventLog: [],
+    notifications: [],
+    users: {
+      [headId]: makeDefaultUser(headId, 'Adam Kowalski', 'A', 'Głowa rodziny', 12500, 5000)
+    },
+    standingOrders: [],
+    lastSave: Date.now()
+  };
+}
+
+function makeDefaultUser(id, name, initials, role, balance, savings){
+  return {
+    id, name, initials, role,
+    balance: balance,
+    savings: savings,
+    savingsRate: 0.02,
+    creditScore: 65,
+    status: 'Aktywny',
+    jobs: [],
+    insurances: [],
+    bills: [
+      {id:'b_prad',   name:'Prąd',     amount:180, dueDay:10, paid:false, overdueCount:0},
+      {id:'b_woda',   name:'Woda',     amount:90,  dueDay:12, paid:false, overdueCount:0},
+      {id:'b_internet',name:'Internet',amount:80,  dueDay:15, paid:false, overdueCount:0},
+      {id:'b_czynsz', name:'Czynsz za dom', amount:1200, dueDay:5, paid:false, overdueCount:0}
+    ],
+    portfolio: {
+      crypto: {},      // {BTC: ilość}
+      stocks: {},      // {PKO: ilość}
+      realEstate: [],  // [{id,name,value,rent,mortgage}]
+      bonds: [],       // [{id,amount,rate,months,startMonth}]
+      deposits: [],    // [{id,amount,rate,months,startMonth}]
+      startups: [],    // [{id,name,invested,risk,startMonth,resolved}]
+      ppk: 0,
+      goldOz: 0,
+      oilBarrels: 0
+    },
+    loans: [],         // [{id,type,principal,remaining,rate,months,monthlyPayment,startMonth}]
+    achievements: [],
+    goals: [],         // [{id,name,target,current,deadlineMonth}]
+    history: []        // [{ts,simMonth,type,category,amount,currency,note,balanceAfter}]
+  };
+}
+
+let DB = null;
+
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(DB_KEY);
+    if(!raw){ DB = defaultDB(); saveDB(); return DB; }
+    const parsed = JSON.parse(raw);
+    DB = parsed;
+    return DB;
+  }catch(e){
+    console.error('Błąd wczytywania bazy danych, tworzę nową.', e);
+    DB = defaultDB();
+    saveDB();
+    return DB;
+  }
+}
+
+function saveDB(){
+  DB.lastSave = Date.now();
+  localStorage.setItem(DB_KEY, JSON.stringify(DB));
+}
+
+function getUser(id){ return DB.users[id || DB.currentUserId]; }
+function getCurrentUser(){ return DB.users[DB.currentUserId]; }
+
+/* ---------- WALUTY ---------- */
+function convertCurrency(amount, fromCur, toCur){
+  if(fromCur === toCur) return amount;
+  const plnAmount = amount / DB.fxRates[fromCur];
+  return plnAmount * DB.fxRates[toCur];
+}
+function toDisplay(amountInPLN){
+  return convertCurrency(amountInPLN, 'PLN', DB.displayCurrency);
+}
+function fmtMoney(amountInPLN, opts){
+  opts = opts || {};
+  const cur = opts.currency || DB.displayCurrency;
+  const val = opts.alreadyConverted ? amountInPLN : convertCurrency(amountInPLN, 'PLN', cur);
+  const sign = val < 0 ? '-' : (opts.forceSign ? '+' : '');
+  const abs = Math.abs(val);
+  const formatted = abs.toLocaleString('pl-PL', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return `${sign}${formatted} ${CURRENCY_SYMBOLS[cur]}`;
+}
+function fluctuateFxRates(){
+  Object.keys(DB.fxRates).forEach(cur=>{
+    if(cur === 'PLN') return;
+    const base = BASE_FX_RATES[cur];
+    const drift = (Math.random()-0.5) * 0.01;
+    DB.fxRates[cur] = Math.max(base*0.85, Math.min(base*1.15, DB.fxRates[cur]*(1+drift)));
+  });
+}
+
+/* ---------- SYNC STANU / TRANSAKCJE ---------- */
+function pushNotification(message, kind){
+  DB.notifications.unshift({
+    id: 'n_'+Date.now()+'_'+Math.floor(Math.random()*9999),
+    message, kind: kind || 'info', ts: Date.now(), read:false
+  });
+  if(DB.notifications.length > 100) DB.notifications.length = 100;
+}
+
+function addTransaction(userId, category, amountPLN, note, opts){
+  opts = opts || {};
+  const user = getUser(userId);
+  const meta = CATEGORY_META[category] || CATEGORY_META.inne;
+  const kind = opts.kind || meta.kind;
+  const delta = kind === 'expense' ? -Math.abs(amountPLN) : Math.abs(amountPLN);
+  const target = opts.targetField || 'balance';
+  user[target] = round2(user[target] + delta);
+  user.history.unshift({
+    ts: Date.now(),
+    simMonth: `${DB.simDate.year}-${String(DB.simDate.month+1).padStart(2,'0')}`,
+    category, kind,
+    amountPLN: delta,
+    note: note || meta.label,
+    balanceAfter: user.balance,
+    savingsAfter: user.savings
+  });
+  if(user.history.length > 500) user.history.length = 500;
+  return delta;
+}
+
+function round2(n){ return Math.round(n*100)/100; }
+
+function transferBetweenUsers(fromId, toId, amountPLN, note){
+  const from = getUser(fromId), to = getUser(toId);
+  if(from.balance < amountPLN) return {ok:false, error:'Niewystarczające środki'};
+  addTransaction(fromId, 'przelew_out', amountPLN, note || `Przelew do ${to.name}`);
+  addTransaction(toId, 'przelew_in', amountPLN, note || `Przelew od ${from.name}`);
+  saveDB();
+  return {ok:true};
+}
+
+function transferToFamilyPool(userId, amountPLN, note){
+  const user = getUser(userId);
+  if(user.balance < amountPLN) return {ok:false, error:'Niewystarczające środki'};
+  addTransaction(userId, 'przelew_out', amountPLN, note || 'Wpłata do puli rodzinnej');
+  DB.familyPool.balance = round2(DB.familyPool.balance + amountPLN);
+  DB.familyPool.history.unshift({ts:Date.now(), userId, amountPLN, note: note || 'Wpłata'});
+  saveDB();
+  return {ok:true};
+}
+
+function withdrawFromFamilyPool(userId, amountPLN, note){
+  if(DB.familyPool.balance < amountPLN) return {ok:false, error:'Pula rodzinna ma za mało środków'};
+  DB.familyPool.balance = round2(DB.familyPool.balance - amountPLN);
+  addTransaction(userId, 'przelew_in', amountPLN, note || 'Wypłata z puli rodzinnej');
+  DB.familyPool.history.unshift({ts:Date.now(), userId, amountPLN:-amountPLN, note: note || 'Wypłata'});
+  saveDB();
+  return {ok:true};
+}
+
+function calcNetWorth(user){
+  let total = user.balance + user.savings;
+  Object.entries(user.portfolio.crypto).forEach(([sym, qty])=>{
+    const c = DB.market.crypto.find(x=>x.sym===sym);
+    if(c) total += c.price * qty;
+  });
+  Object.entries(user.portfolio.stocks).forEach(([sym, qty])=>{
+    const s = DB.market.stocks.find(x=>x.sym===sym);
+    if(s) total += s.price * qty;
+  });
+  user.portfolio.realEstate.forEach(p => total += p.value - (p.mortgage || 0));
+  user.portfolio.bonds.forEach(b => total += b.amount);
+  user.portfolio.deposits.forEach(d => total += d.amount);
+  user.portfolio.startups.forEach(s => { if(!s.resolved) total += s.invested; });
+  total += user.portfolio.ppk;
+  total += user.portfolio.goldOz * DB.market.commodities.gold.price;
+  total += user.portfolio.oilBarrels * DB.market.commodities.oil.price;
+  user.loans.forEach(l => total -= l.remaining);
+  return round2(total);
+}
+
+function calcFamilyNetWorth(){
+  return round2(Object.values(DB.users).reduce((sum,u)=> sum + calcNetWorth(u), 0) + DB.familyPool.balance);
+}
+
+/* Init przy pierwszym uruchomieniu */
+loadDB();
+</script>
+
+// =============================================================
+// NOWE FUNKCJE – CZĘŚĆ 3/4: ZARZĄDZANIE RODZINĄ, RYNEK, PRACA
+// =============================================================
+
+/* ---------- ZARZĄDZANIE RODZINĄ ---------- */
+function addFamilyMember(name, initials, role, balance, savings){
+    const id = 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+    const user = makeDefaultUser(id, name, initials, role, balance || 5000, savings || 1000);
+    DB.users[id] = user;
+    pushNotification(`Dodano nowego członka rodziny: ${name} (${role})`, 'success');
+    saveDB();
+    return id;
+}
+
+function removeFamilyMember(userId){
+    if(userId === 'u_head') return {ok:false, error:'Nie można usunąć głowy rodziny'};
+    if(!DB.users[userId]) return {ok:false, error:'Użytkownik nie istnieje'};
+    delete DB.users[userId];
+    pushNotification(`Usunięto członka rodziny`, 'warn');
+    saveDB();
+    return {ok:true};
+}
+
+function getFamilyMembers(){
+    return Object.values(DB.users);
+}
+
+function getFamilyLeaderboard(){
+    return Object.values(DB.users)
+        .map(u => ({...u, netWorth: calcNetWorth(u)}))
+        .sort((a,b) => b.netWorth - a.netWorth);
+}
+
+/* ---------- ZARZĄDZANIE PRACĄ ---------- */
+function refreshJobOffers(){
+    const count = 6 + Math.floor(Math.random() * 5);
+    const shuffled = [...JOB_OFFERS_POOL].sort(() => Math.random() - 0.5);
+    DB.jobOffersAvailable = shuffled.slice(0, count).map(j => ({
+        ...j,
+        id: j.id + '_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000
+    }));
+    saveDB();
+    return DB.jobOffersAvailable;
+}
+
+function applyForJob(userId, jobId){
+    const user = getUser(userId);
+    const job = DB.jobOffersAvailable.find(j => j.id === jobId);
+    if(!job) return {ok:false, error:'Oferta wygasła lub nie istnieje'};
+    
+    const successRate = job.successBase + (user.creditScore / 200);
+    const success = Math.random() < Math.min(successRate, 0.95);
+    
+    DB.jobOffersAvailable = DB.jobOffersAvailable.filter(j => j.id !== jobId);
+    
+    if(success){
+        user.jobs.push({
+            id: 'j_' + Date.now(),
+            title: job.title,
+            salary: job.salary,
+            sector: job.sector,
+            startMonth: `${DB.simDate.year}-${String(DB.simDate.month+1).padStart(2,'0')}`,
+            active: true
+        });
+        pushNotification(`🎉 Rozpocząłeś pracę jako ${job.title} (${job.salary} PLN/mies.)`, 'success');
+        saveDB();
+        return {ok:true, message:`Zdobyto pracę: ${job.title}`, job:job};
+    } else {
+        pushNotification(`❌ Nie udało się dostać pracy: ${job.title}`, 'error');
+        saveDB();
+        return {ok:false, message:`Nie udało się dostać pracy: ${job.title}`};
+    }
+}
+
+function quitJob(userId, jobId){
+    const user = getUser(userId);
+    const idx = user.jobs.findIndex(j => j.id === jobId && j.active);
+    if(idx === -1) return {ok:false, error:'Praca nie istnieje lub już nieaktywna'};
+    const job = user.jobs[idx];
+    job.active = false;
+    job.endMonth = `${DB.simDate.year}-${String(DB.simDate.month+1).padStart(2,'0')}`;
+    pushNotification(`👋 Zrezygnowano z pracy: ${job.title}`, 'warn');
+    saveDB();
+    return {ok:true};
+}
+
+function collectSalary(userId){
+    const user = getUser(userId);
+    let totalSalary = 0;
+    user.jobs.forEach(job => {
+        if(job.active){
+            const net = job.salary * (1 - 0.12); // 12% podatku
+            totalSalary += net;
+            addTransaction(userId, 'wyplata', net, `Wypłata: ${job.title} (po podatku)`);
+        }
+    });
+    if(totalSalary > 0){
+        pushNotification(`💵 Otrzymano wypłaty: ${fmtMoney(totalSalary)}`, 'success');
+        saveDB();
+    }
+    return totalSalary;
+}
+
+/* ---------- RYNEK FINANSOWY ---------- */
+function updateMarketPrices(){
+    // Krypto
+    DB.market.crypto.forEach(c => {
+        const change = (Math.random() - 0.5) * c.vol * 2;
+        c.price = Math.max(0.01, c.price * (1 + change));
+        c.history.push(c.price);
+        if(c.history.length > 100) c.history.shift();
+    });
+    // Akcje
+    DB.market.stocks.forEach(s => {
+        const change = (Math.random() - 0.5) * s.vol * 2;
+        s.price = Math.max(0.01, s.price * (1 + change));
+        s.history.push(s.price);
+        if(s.history.length > 100) s.history.shift();
+    });
+    // Surowce
+    ['gold','oil'].forEach(key => {
+        const item = DB.market.commodities[key];
+        const change = (Math.random() - 0.5) * item.vol * 2;
+        item.price = Math.max(0.01, item.price * (1 + change));
+        item.history.push(item.price);
+        if(item.history.length > 100) item.history.shift();
+    });
+    fluctuateFxRates();
+    saveDB();
+}
+
+function buyCrypto(userId, symbol, quantity){
+    const user = getUser(userId);
+    const asset = DB.market.crypto.find(c => c.sym === symbol);
+    if(!asset) return {ok:false, error:'Nieznana kryptowaluta'};
+    const cost = asset.price * quantity;
+    if(user.balance < cost) return {ok:false, error:'Niewystarczające środki'};
+    user.balance = round2(user.balance - cost);
+    user.portfolio.crypto[symbol] = (user.portfolio.crypto[symbol] || 0) + quantity;
+    addTransaction(userId, 'inwestycja', cost, `Zakup ${quantity} ${symbol} po ${fmtMoney(asset.price)}`);
+    pushNotification(`📈 Zakupiono ${quantity} ${symbol}`, 'info');
+    saveDB();
+    return {ok:true, cost:cost};
+}
+
+function sellCrypto(userId, symbol, quantity){
+    const user = getUser(userId);
+    const asset = DB.market.crypto.find(c => c.sym === symbol);
+    if(!asset) return {ok:false, error:'Nieznana kryptowaluta'};
+    const held = user.portfolio.crypto[symbol] || 0;
+    if(held < quantity) return {ok:false, error:'Niewystarczająca ilość'};
+    const revenue = asset.price * quantity;
+    user.balance = round2(user.balance + revenue);
+    user.portfolio.crypto[symbol] = held - quantity;
+    if(user.portfolio.crypto[symbol] === 0) delete user.portfolio.crypto[symbol];
+    addTransaction(userId, 'sprzedaz', revenue, `Sprzedaż ${quantity} ${symbol} po ${fmtMoney(asset.price)}`);
+    pushNotification(`💰 Sprzedano ${quantity} ${symbol}`, 'info');
+    saveDB();
+    return {ok:true, revenue:revenue};
+}
+
+function buyStock(userId, symbol, quantity){
+    const user = getUser(userId);
+    const asset = DB.market.stocks.find(s => s.sym === symbol);
+    if(!asset) return {ok:false, error:'Nieznana akcja'};
+    const cost = asset.price * quantity;
+    if(user.balance < cost) return {ok:false, error:'Niewystarczające środki'};
+    user.balance = round2(user.balance - cost);
+    user.portfolio.stocks[symbol] = (user.portfolio.stocks[symbol] || 0) + quantity;
+    addTransaction(userId, 'inwestycja', cost, `Zakup ${quantity} ${symbol} po ${fmtMoney(asset.price)}`);
+    pushNotification(`📊 Zakupiono ${quantity} ${symbol}`, 'info');
+    saveDB();
+    return {ok:true, cost:cost};
+}
+
+function sellStock(userId, symbol, quantity){
+    const user = getUser(userId);
+    const asset = DB.market.stocks.find(s => s.sym === symbol);
+    if(!asset) return {ok:false, error:'Nieznana akcja'};
+    const held = user.portfolio.stocks[symbol] || 0;
+    if(held < quantity) return {ok:false, error:'Niewystarczająca ilość'};
+    const revenue = asset.price * quantity;
+    user.balance = round2(user.balance + revenue);
+    user.portfolio.stocks[symbol] = held - quantity;
+    if(user.portfolio.stocks[symbol] === 0) delete user.portfolio.stocks[symbol];
+    addTransaction(userId, 'sprzedaz', revenue, `Sprzedaż ${quantity} ${symbol} po ${fmtMoney(asset.price)}`);
+    pushNotification(`💰 Sprzedano ${quantity} ${symbol}`, 'info');
+    saveDB();
+    return {ok:true, revenue:revenue};
+}
+
+function collectDividends(userId){
+    const user = getUser(userId);
+    let totalDiv = 0;
+    Object.entries(user.portfolio.stocks).forEach(([sym, qty]) => {
+        const asset = DB.market.stocks.find(s => s.sym === sym);
+        if(asset){
+            const div = asset.price * 0.005 * qty;
+            if(div > 0.01){
+                totalDiv += div;
+                addTransaction(userId, 'dywidenda', div, `Dywidenda z ${sym} (${qty} szt.)`);
+            }
+        }
+    });
+    if(totalDiv > 0){
+        pushNotification(`💵 Otrzymano dywidendy: ${fmtMoney(totalDiv)}`, 'success');
+        saveDB();
+    }
+    return totalDiv;
+}
+
+/* ---------- RACHUNKI ---------- */
+function payBill(userId, billId){
+    const user = getUser(userId);
+    const bill = user.bills.find(b => b.id === billId);
+    if(!bill) return {ok:false, error:'Rachunek nie istnieje'};
+    if(bill.paid) return {ok:false, error:'Rachunek już opłacony'};
+    if(user.balance < bill.amount) return {ok:false, error:'Niewystarczające środki'};
+    user.balance = round2(user.balance - bill.amount);
+    bill.paid = true;
+    addTransaction(userId, 'rachunki', bill.amount, `Opłata: ${bill.name}`);
+    pushNotification(`✅ Opłacono rachunek: ${bill.name} (${fmtMoney(bill.amount)})`, 'success');
+    saveDB();
+    return {ok:true};
+}
+
+function processMonthlyBills(userId){
+    const user = getUser(userId);
+    let totalBills = 0;
+    let overdueCount = 0;
+    user.bills.forEach(bill => {
+        if(!bill.paid){
+            bill.overdueCount = (bill.overdueCount || 0) + 1;
+            const penalty = bill.amount * 0.05 * bill.overdueCount;
+            if(user.balance >= penalty){
+                user.balance = round2(user.balance - penalty);
+                addTransaction(userId, 'kara', penalty, `Kara za zwłokę: ${bill.name}`);
+                totalBills += penalty;
+            }
+            overdueCount++;
+            user.creditScore = Math.max(0, user.creditScore - 2);
+        }
+        bill.paid = false;
+    });
+    if(overdueCount > 0){
+        pushNotification(`⚠️ ${overdueCount} nieopłaconych rachunków, naliczono kary`, 'error');
+    }
+    saveDB();
+    return totalBills;
+}
+
+/* ---------- KREDYTY ---------- */
+function takeLoan(userId, amount, rate, months){
+    const user = getUser(userId);
+    const maxLoan = user.balance * 3 + user.savings * 0.5;
+    if(amount > maxLoan) return {ok:false, error:'Przekroczono zdolność kredytową'};
+    const monthlyRate = rate / 12;
+    const monthlyPayment = amount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+    const id = 'loan_' + Date.now();
+    user.loans.push({
+        id, type:'gotówkowy',
+        principal: amount,
+        remaining: amount,
+        rate: rate,
+        months: months,
+        monthlyPayment: monthlyPayment,
+        startMonth: `${DB.simDate.year}-${String(DB.simDate.month+1).padStart(2,'0')}`
+    });
+    user.balance = round2(user.balance + amount);
+    addTransaction(userId, 'przelew_in', amount, `Nowy kredyt (${months} mies., ${rate}%)`);
+    pushNotification(`🏦 Zaciągnięto kredyt: ${fmtMoney(amount)}`, 'info');
+    saveDB();
+    return {ok:true, monthlyPayment:monthlyPayment};
+}
+
+function processLoanPayment(userId){
+    const user = getUser(userId);
+    let totalPaid = 0;
+    user.loans.forEach(loan => {
+        if(loan.remaining > 0){
+            const payment = Math.min(loan.monthlyPayment, loan.remaining);
+            if(user.balance >= payment){
+                user.balance = round2(user.balance - payment);
+                loan.remaining = round2(loan.remaining - payment);
+                addTransaction(userId, 'kredyt_rata', payment, `Rata kredytu (pozostało: ${fmtMoney(loan.remaining)})`);
+                totalPaid += payment;
+                if(loan.remaining <= 0){
+                    pushNotification(`✅ Kredyt spłacony!`, 'success');
+                    user.creditScore = Math.min(100, user.creditScore + 5);
+                }
+            } else {
+                user.creditScore = Math.max(0, user.creditScore - 3);
+                pushNotification(`⚠️ Brak środków na ratę kredytu!`, 'error');
+            }
+        }
+    });
+    if(totalPaid > 0) saveDB();
+    return totalPaid;
+}
+
+/* ---------- UBEZPIECZENIA ---------- */
+function buyInsurance(userId, type, monthlyCost, coverage){
+    const user = getUser(userId);
+    if(user.balance < monthlyCost) return {ok:false, error:'Niewystarczające środki'};
+    user.balance = round2(user.balance - monthlyCost);
+    const id = 'ins_' + Date.now();
+    user.insurances.push({
+        id, type, monthlyCost, coverage,
+        startMonth: `${DB.simDate.year}-${String(DB.simDate.month+1).padStart(2,'0')}`,
+        active: true
+    });
+    addTransaction(userId, 'ubezpieczenie', monthlyCost, `Ubezpieczenie: ${type}`);
+    pushNotification(`🛡️ Wykupiono ubezpieczenie ${type}`, 'success');
+    saveDB();
+    return {ok:true};
+}
+
+function processInsuranceClaim(userId, type, damageAmount){
+    const user = getUser(userId);
+    const insurance = user.insurances.find(i => i.type === type && i.active);
+    if(!insurance) return {ok:false, error:'Brak aktywnego ubezpieczenia tego typu'};
+    const covered = Math.min(damageAmount, insurance.coverage);
+    user.balance = round2(user.balance + covered);
+    addTransaction(userId, 'przelew_in', covered, `Odszkodowanie z ubezpieczenia ${type}`);
+    pushNotification(`💰 Otrzymano odszkodowanie: ${fmtMoney(covered)}`, 'success');
+    saveDB();
+    return {ok:true, covered:covered};
+}
+
+/* ---------- CELE OSZCZĘDNOŚCIOWE ---------- */
+function addGoal(userId, name, target, deadlineMonth){
+    const user = getUser(userId);
+    user.goals.push({
+        id: 'goal_' + Date.now(),
+        name, target, current:0,
+        deadlineMonth: deadlineMonth || 12,
+        startMonth: `${DB.simDate.year}-${String(DB.simDate.month+1).padStart(2,'0')}`
+    });
+    pushNotification(`🎯 Nowy cel: ${name} (${fmtMoney(target)})`, 'info');
+    saveDB();
+    return {ok:true};
+}
+
+function contributeToGoal(userId, goalId, amount){
+    const user = getUser(userId);
+    const goal = user.goals.find(g => g.id === goalId);
+    if(!goal) return {ok:false, error:'Cel nie istnieje'};
+    if(user.balance < amount) return {ok:false, error:'Niewystarczające środki'};
+    user.balance = round2(user.balance - amount);
+    goal.current = round2(goal.current + amount);
+    addTransaction(userId, 'inne', amount, `Wpłata na cel: ${goal.name}`);
+    pushNotification(`💰 Wpłacono ${fmtMoney(amount)} na cel: ${goal.name}`, 'info');
+    if(goal.current >= goal.target){
+        pushNotification(`🏆 Osiągnięto cel: ${goal.name}!`, 'success');
+        user.creditScore = Math.min(100, user.creditScore + 10);
+        user.achievements.push({
+            id:'ach_' + Date.now(),
+            name: `Osiągnięto cel: ${goal.name}`,
+            date: Date.now()
+        });
+    }
+    saveDB();
+    return {ok:true};
+}
+
+/* ---------- PRZESUWANIE MIESIĄCA ---------- */
+function advanceMonth(){
+    const date = DB.simDate;
+    date.month++;
+    if(date.month > 11){ date.month = 0; date.year++; }
+    
+    // Wypłaty
+    Object.keys(DB.users).forEach(uid => {
+        collectSalary(uid);
+        processMonthlyBills(uid);
+        processLoanPayment(uid);
+        collectDividends(uid);
+        
+        // Odsetki od oszczędności
+        const user = getUser(uid);
+        const interest = user.savings * user.savingsRate;
+        if(interest > 0.01){
+            user.savings = round2(user.savings + interest);
+            addTransaction(uid, 'odsetki', interest, `Odsetki od oszczędności (${user.savingsRate*100}%)`);
+        }
+    });
+    
+    // Aktywne zlecenia stałe
+    DB.standingOrders.forEach(order => {
+        if(order.active){
+            const result = transferBetweenUsers(order.fromId, order.toId, order.amount, order.note);
+            if(!result.ok) pushNotification(`⚠️ Zlecenie stałe: ${order.note} - ${result.error}`, 'error');
+        }
+    });
+    
+    // Aktualizacja rynku
+    updateMarketPrices();
+    
+    // Zdarzenia losowe
+    if(Math.random() < 0.15){
+        const userId = Object.keys(DB.users)[Math.floor(Math.random() * Object.keys(DB.users).length)];
+        const user = getUser(userId);
+        if(Math.random() < 0.5){
+            const bonus = 500 + Math.random() * 3000;
+            user.balance = round2(user.balance + bonus);
+            addTransaction(userId, 'bonus', bonus, 'Bonus losowy! 🎉');
+            pushNotification(`🎁 ${user.name} otrzymał bonus: ${fmtMoney(bonus)}`, 'success');
+        } else {
+            const penalty = 200 + Math.random() * 1500;
+            user.balance = round2(user.balance - penalty);
+            addTransaction(userId, 'zdarzenie_neg', penalty, 'Koszt losowy! 💥');
+            pushNotification(`💥 ${user.name} poniósł koszt: ${fmtMoney(penalty)}`, 'error');
+            // Sprawdź ubezpieczenie
+            const ins = user.insurances.find(i => i.active);
+            if(ins){
+                const covered = processInsuranceClaim(userId, ins.type, penalty);
+                if(covered.ok) pushNotification(`🛡️ Ubezpieczenie pokryło ${fmtMoney(covered.covered)}`, 'info');
+            }
+        }
+    }
+    
+    // Odśwież oferty pracy
+    refreshJobOffers();
+    
+    saveDB();
+    pushNotification(`📅 Przesunięto na ${date.month+1}/${date.year}`, 'info');
+    renderAll();
+    return DB.simDate;
+}
+
+/* ---------- NARZĘDZIA ---------- */
+function exportDatabase(){
+    const data = JSON.stringify(DB, null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `apex_bank_backup_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    pushNotification('📦 Baza danych wyeksportowana', 'success');
+}
+
+function importDatabase(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+        try{
+            const data = JSON.parse(e.target.result);
+            DB = data;
+            saveDB();
+            pushNotification('📦 Baza danych zaimportowana pomyślnie', 'success');
+            renderAll();
+        }catch(err){
+            pushNotification('❌ Błąd importu: niepoprawny format', 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+
+function calculateCreditWorthiness(userId){
+    const user = getUser(userId);
+    let score = 0;
+    score += user.creditScore * 0.6;
+    score += Math.min(100, user.savings / 1000) * 0.2;
+    score += Math.min(100, user.balance / 500) * 0.1;
+    const debtRatio = user.loans.reduce((sum,l) => sum + l.remaining, 0) / (user.balance + user.savings + 1);
+    score -= Math.min(50, debtRatio * 200);
+    return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function getFinancialHealth(userId){
+    const user = getUser(userId);
+    const netWorth = calcNetWorth(user);
+    const debt = user.loans.reduce((sum,l) => sum + l.remaining, 0);
+    const liquidity = user.balance / (debt + 0.01);
+    const score = user.creditScore;
+    let health = 50;
+    health += Math.min(30, netWorth / 10000) * 0.3;
+    health += Math.min(20, liquidity * 5);
+    health += score * 0.3;
+    return Math.max(0, Math.min(100, Math.round(health)));
+}
+
+// =============================================================
+// RENDEROWANIE – PODSTAWOWY SZKIELET
+// =============================================================
+
+function renderAll(){
+    const content = document.getElementById('contentArea');
+    const user = getCurrentUser();
+    const familyNW = calcFamilyNetWorth();
+    const myNW = calcNetWorth(user);
+    
+    // Hero
+    let html = `
+    <div class="hero-ticker">
+        <div class="hero-left">
+            <div class="hero-label">💰 Majątek rodziny</div>
+            <div class="hero-value">${fmtMoney(familyNW)} <span class="cur">${DB.displayCurrency}</span></div>
+            <div class="hero-delta up">📈 +${(Math.random()*0.5+0.1).toFixed(2)}% miesiąc</div>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-label">Twój majątek</div>
+                <div class="hero-stat-value">${fmtMoney(myNW)}</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-label">Saldo konta</div>
+                <div class="hero-stat-value">${fmtMoney(user.balance)}</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-label">Oszczędności</div>
+                <div class="hero-stat-value">${fmtMoney(user.savings)}</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-label">Pula rodzinna</div>
+                <div class="hero-stat-value">${fmtMoney(DB.familyPool.balance)}</div>
+            </div>
+        </div>
+    </div>
+    <div class="grid grid-4">
+        <div class="card"><div class="card-title">📊 Zdrowie finansowe</div>
+            <div class="card-value">${getFinancialHealth(DB.currentUserId)}%</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${getFinancialHealth(DB.currentUserId)}%"></div></div>
+        </div>
+        <div class="card"><div class="card-title">🏦 Scoring kredytowy</div>
+            <div class="card-value">${user.creditScore}/100</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${user.creditScore}%;background:${user.creditScore>60?'var(--primary)':'var(--gold)'}"></div></div>
+        </div>
+        <div class="card"><div class="card-title">💼 Aktywne prace</div>
+            <div class="card-value">${user.jobs.filter(j=>j.active).length}</div>
+            <div class="text-muted" style="font-size:13px">${user.jobs.filter(j=>j.active).map(j=>j.title).join(', ') || 'Brak'}</div>
+        </div>
+        <div class="card"><div class="card-title">📅 Miesiąc</div>
+            <div class="card-value">${DB.simDate.month+1}/${DB.simDate.year}</div>
+            <div class="text-muted" style="font-size:13px">${Object.keys(DB.users).length} członków rodziny</div>
+        </div>
+    </div>
+    <div class="section-head"><div class="section-title">📈 Rynek</div></div>
+    <div class="grid grid-3">
+        <div class="card"><div class="card-title">₿ BTC</div>
+            <div class="card-value">${fmtMoney(DB.market.crypto.find(c=>c.sym==='BTC').price)}</div>
+        </div>
+        <div class="card"><div class="card-title">🥇 Złoto</div>
+            <div class="card-value">${fmtMoney(DB.market.commodities.gold.price)}</div>
+        </div>
+        <div class="card"><div class="card-title">🛢️ Ropa</div>
+            <div class="card-value">${fmtMoney(DB.market.commodities.oil.price)}</div>
+        </div>
+    </div>
+    `;
+    
+    // Oferty pracy
+    if(DB.jobOffersAvailable.length > 0){
+        html += `<div class="section-head"><div class="section-title">💼 Oferty pracy</div></div><div class="grid grid-2">`;
+        DB.jobOffersAvailable.slice(0,4).forEach(job => {
+            html += `<div class="card">
+                <div class="card-title">${job.title} <span class="badge info">${job.sector}</span></div>
+                <div class="card-value" style="font-size:20px">${fmtMoney(job.salary)}/mies.</div>
+                <button class="btn-primary mt-8" onclick="applyForJob('${DB.currentUserId}','${job.id}')">📩 Aplikuj</button>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+    
+    // Cele
+    if(user.goals.length > 0){
+        html += `<div class="section-head"><div class="section-title">🎯 Cele oszczędnościowe</div></div><div class="grid grid-2">`;
+        user.goals.forEach(goal => {
+            const pct = Math.min(100, (goal.current/goal.target)*100);
+            html += `<div class="card">
+                <div class="card-title">${goal.name}</div>
+                <div class="card-value" style="font-size:18px">${fmtMoney(goal.current)} / ${fmtMoney(goal.target)}</div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                <div class="flex mt-8 gap-8">
+                    <input type="number" id="goalAmount_${goal.id}" placeholder="Kwota" style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--panel-border);background:var(--bg-alt);color:var(--text)">
+                    <button class="btn-secondary" onclick="contributeToGoal('${DB.currentUserId}','${goal.id}',parseFloat(document.getElementById('goalAmount_${goal.id}').value)||0)">+ Wpłać</button>
+                </div>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+    
+    content.innerHTML = html;
+}
+
+// =============================================================
+// INICJALIZACJA
+// =============================================================
+
+function init(){
+    // Ustawienia nawigacji
+    document.querySelectorAll('.nav-item').forEach(el => {
+        el.addEventListener('click', function(){
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            this.classList.add('active');
+            renderAll();
+        });
+    });
+    
+    // Zwiń sidebar
+    document.getElementById('collapseBtn').addEventListener('click', function(){
+        document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+    
+    // Motyw
+    if(DB.theme === 'light') document.body.classList.add('light-mode');
+    document.getElementById('themeToggleBtn').addEventListener('click', function(){
+        document.body.classList.toggle('light-mode');
+        DB.theme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+        saveDB();
+        this.textContent = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+    });
+    
+    // Przełącznik waluty
+    document.getElementById('currencySelect').value = DB.displayCurrency;
+    document.getElementById('currencySelect').addEventListener('change', function(){
+        DB.displayCurrency = this.value;
+        saveDB();
+        renderAll();
+    });
+    
+    // Przełącznik profilu
+    const sel = document.getElementById('profileSelect');
+    sel.innerHTML = '';
+    Object.entries(DB.users).forEach(([id, u]) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = `${u.initials} - ${u.name}`;
+        if(id === DB.currentUserId) opt.selected = true;
+        sel.appendChild(opt);
+    });
+    sel.addEventListener('change', function(){
+        DB.currentUserId = this.value;
+        saveDB();
+        const user = getCurrentUser();
+        document.getElementById('topAvatar').textContent = user.initials;
+        renderAll();
+    });
+    const user = getCurrentUser();
+    document.getElementById('topAvatar').textContent = user.initials;
+    
+    // Przycisk miesiąca
+    document.getElementById('advanceMonthBtn').addEventListener('click', function(){
+        advanceMonth();
+        renderAll();
+    });
+    
+    // Notifications
+    let notifCount = DB.notifications.filter(n => !n.read).length;
+    if(notifCount > 0){
+        document.getElementById('notifDot').style.display = 'block';
+    }
+    document.getElementById('notifBtn').addEventListener('click', function(){
+        const modal = document.getElementById('modalOverlay');
+        const body = document.getElementById('modalBody');
+        let html = `<div class="modal-title">🔔 Powiadomienia</div>`;
+        DB.notifications.slice(0,20).forEach(n => {
+            const date = new Date(n.ts).toLocaleString();
+            html += `<div style="padding:8px 0;border-bottom:1px solid var(--panel-border)">
+                <div>${n.message}</div>
+                <div style="font-size:11px;color:var(--muted)">${date}</div>
+            </div>`;
+            n.read = true;
+        });
+        body.innerHTML = html;
+        modal.classList.add('open');
+        document.getElementById('notifDot').style.display = 'none';
+        saveDB();
+    });
+    
+    // Modal close
+    document.getElementById('modalClose').addEventListener('click', function(){
+        document.getElementById('modalOverlay').classList.remove('open');
+    });
+    document.getElementById('modalOverlay').addEventListener('click', function(e){
+        if(e.target === this) this.classList.remove('open');
+    });
+    
+    renderAll();
+}
+
+// Uruchom
+document.addEventListener('DOMContentLoaded', init);
+</body>
+</html>
