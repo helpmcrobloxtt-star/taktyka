@@ -1,44 +1,351 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <title>PL Manager PRO 2026</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Premier League Manager 2026</title>
+<style>
+  :root {
+    --bg: #090a0f;
+    --panel: #13151f;
+    --panel-border: #232738;
+    --primary: #10b981;
+    --primary-hover: #059669;
+    --gold: #f59e0b;
+    --danger: #ef4444;
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { background: var(--bg); color: var(--text); padding: 20px; min-height: 100vh; }
+  .app-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  
+  header { display: flex; justify-content: space-between; align-items: center; background: var(--panel); border: 1px solid var(--panel-border); padding: 15px 25px; border-radius: 12px; }
+  .logo-area h1 { font-size: 1.4rem; color: var(--gold); }
+  .logo-area p { font-size: 0.8rem; color: var(--muted); }
+  
+  .nav-tabs { display: flex; gap: 10px; }
+  .tab-btn { background: #1a1d2c; border: 1px solid var(--panel-border); color: var(--muted); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.2s; }
+  .tab-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+  
+  .view-section { display: none; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .view-section.active { display: grid; }
+  .full-width { grid-column: span 2; }
+  
+  .card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+  .card h2 { font-size: 1.1rem; color: var(--gold); border-bottom: 1px solid var(--panel-border); padding-bottom: 8px; }
+  
+  select, input, button { background: #1a1d2c; border: 1px solid var(--panel-border); color: var(--text); padding: 10px; border-radius: 6px; font-size: 0.9rem; width: 100%; outline: none; }
+  button { background: var(--primary); color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; border: none; }
+  button:hover { background: var(--primary-hover); color: #fff; }
+  
+  .table-box { max-height: 380px; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--panel-border); text-align: left; }
+  th { background: #181c2e; color: var(--muted); position: sticky; top: 0; }
+  tr:hover { background: rgba(255,255,255,0.02); }
+  
+  .log-box { background: #050608; border: 1px solid var(--panel-border); border-radius: 6px; padding: 12px; height: 220px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; line-height: 1.4; color: #34d399; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat-box { background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border); padding: 10px; border-radius: 6px; text-align: center; }
+  .stat-label { font-size: 0.75rem; color: var(--muted); display: block; }
+  .stat-val { font-size: 1.1rem; font-weight: bold; color: var(--primary); }
+</style>
 </head>
 <body>
-    <header>
-        <h1>PL MANAGER 2026</h1>
-        <div id="status-bar">Klub: <span id="club-name">-</span> | Budżet: <span id="budget-val">0</span> €</div>
-    </header>
-    <main>
-        <div class="column">
-            <div class="card">
-                <h2>Taktyka (FIFA Style)</h2>
-                <label>Styl: <select id="style-select"></select></label>
-                <input type="range" id="width-range" title="Szerokość">
-                <button onclick="Tactics.apply()">Zatwierdź</button>
-            </div>
-            <div class="card">
-                <h2>Transfery</h2>
-                <div id="transfer-list"></div>
-            </div>
-        </div>
-        <div class="column">
-            <div class="card">
-                <h2>Tabela Premier League</h2>
-                <table id="league-table"><thead><tr><th>Klub</th><th>PKT</th></tr></thead><tbody id="table-body"></tbody></table>
-            </div>
-        </div>
-    </main>
-    <div id="match-zone" class="card">
-        <button onclick="MatchEngine.start()">ROZPOCZNIJ MECZ (90 MIN)</button>
-        <div id="match-live"></div>
-    </div>
 
-    <script src="data.js"></script>
-    <script src="tactics.js"></script>
-    <script src="transfer.js"></script>
-    <script src="match.js"></script>
-    <script src="ui.js"></script>
+<div class="app-container">
+  <header>
+    <div class="logo-area">
+      <h1>PREMIER LEAGUE 2025/2026</h1>
+      <p>Klub: <span id="hdrTeam" style="color:var(--text); font-weight:bold;">Arsenal</span></p>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="Game.switchTab('hub', this)">Główny Panel</button>
+      <button class="tab-btn" onclick="Game.switchTab('table', this)">Tabela i Terminarz</button>
+      <button class="tab-btn" onclick="Game.switchTab('transfers', this)">Transfery i Baza CSV</button>
+      <button class="tab-btn" onclick="Game.switchTab('match', this)">Dzień Meczowy</button>
+    </div>
+  </header>
+
+  <div id="hubView" class="view-section active">
+    <div class="card">
+      <h2>Zarządzanie Zespołem</h2>
+      <div>
+        <label style="font-size:0.8rem; color:var(--muted)">Wybierz swój klub z Premier League:</label>
+        <select id="teamSelect" onchange="Game.setPlayerTeam(this.value)"></select>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><span class="stat-label">Budżet</span><span class="stat-val" id="uiBudget">100,000,000 €</span></div>
+        <div class="stat-box"><span class="stat-label">Siła Kadry</span><span class="stat-val" id="uiOvr">82 OVR</span></div>
+        <div class="stat-box"><span class="stat-label">Kolejka</span><span class="stat-val" id="uiMatchday">1 / 38</span></div>
+      </div>
+      <button onclick="Game.initSeason()">Wygeneruj nowy terminarz (38 kolejek)</button>
+    </div>
+    <div class="card">
+      <h2>Informacje o Klubie</h2>
+      <p style="font-size:0.85rem; color:var(--muted); line-height:1.5;">
+        Zasady taktyczne aktywne: Asymmetric Overload, zakaz wysokich dośrodkowań, Anti-Zirkzee shadow oraz szybkie wing-runs po odzyskaniu piłki.
+      </p>
+      <div style="margin-top:auto">
+        <button style="background:var(--gold); color:#000" onclick="Game.switchTab('match', document.querySelectorAll('.tab-btn')[3])">Przejdź do meczu ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tableView" class="view-section">
+    <div class="card">
+      <h2>Tabela Ligowa Live</h2>
+      <div class="table-box">
+        <table>
+          <thead><tr><th>Poz</th><th>Klub</th><th>M</th><th>Z</th><th>R</th><th>P</th><th>Bramki</th><th>PKT</th></tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Terminarz / Następne Spotkanie</h2>
+      <div id="fixtureInfo" style="font-size:0.9rem; background:rgba(0,0,0,0.2); padding:12px; border-radius:6px;">
+        Brak aktywnego terminarza. Kliknij generowanie w panelu głównym.
+      </div>
+      <button style="margin-top:auto" onclick="Game.switchTab('match', document.querySelectorAll('.tab-btn')[3])">Rozegraj mecz w centrum meczowym</button>
+    </div>
+  </div>
+
+  <div id="transfersView" class="view-section">
+    <div class="card">
+      <h2>Wgraj bazę EAFC26-Men.csv</h2>
+      <p style="font-size:0.75rem; color:var(--muted)">Wybierz plik z urządzenia, aby załadować realnych piłkarzy:</p>
+      <input type="file" id="csvFileInput" accept=".csv" onchange="Game.parseCSVFile(this)">
+      <input type="text" id="playerSearch" placeholder="Szukaj zawodnika po nazwisku..." oninput="Game.renderMarket()">
+      <div class="table-box" style="max-height:200px">
+        <table>
+          <thead><tr><th>Nazwisko</th><th>Poz</th><th>OVR</th><th>Cena</th><th>Kup</th></tr></thead>
+          <tbody id="marketBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Zakontraktowani Piłkarze</h2>
+      <div class="table-box" style="max-height:280px">
+        <table>
+          <thead><tr><th>Zawodnik</th><th>Pozycja</th><th>OVR</th></tr></thead>
+          <tbody id="squadBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="matchView" class="view-section full-width">
+    <div class="card">
+      <h2>Centrum Meczowe <span id="matchSubInfo" style="float:right; font-size:0.8rem; color:var(--muted)"></span></h2>
+      <div style="display:flex; justify-content:space-around; align-items:center; font-size:1.3rem; font-weight:bold; background:rgba(0,0,0,0.4); padding:15px; border-radius:8px;">
+        <span id="mHome">Gospodarz</span>
+        <span id="mScore" style="color:var(--gold); font-size:1.8rem">0 - 0</span>
+        <span id="mAway">Gość</span>
+      </div>
+      <div class="log-box" id="matchLog">Gotowy do rozpoczęcia spotkania...</div>
+      <button style="background:var(--gold); color:#000" id="playBtn" onclick="MatchEngine.startMatch()">ROZEGRAJ MECZ KOLEJKI</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PL_TEAMS = [
+  "Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton",
+  "Chelsea", "Coventry City", "Crystal Palace", "Everton", "Fulham",
+  "Hull City", "Ipswich Town", "Leeds United", "Liverpool", "Manchester City",
+  "Manchester United", "Newcastle United", "Nottingham Forest", "Sunderland", "Tottenham"
+].sort();
+
+const Game = {
+  userTeam: "Arsenal",
+  budget: 100000000,
+  ovr: 82,
+  currentMatchday: 1,
+  table: {},
+  fixtures: [],
+  marketPlayers: [
+    { Name: "Fofana", Position: "RW", OVR: 84, Value: 28000000 },
+    { Name: "Suzuki", Position: "LW", OVR: 82, Value: 24000000 },
+    { Name: "Zirkzee", Position: "ST", OVR: 81, Value: 22000000 },
+    { Name: "Beier", Position: "ST", OVR: 79, Value: 16000000 }
+  ],
+  mySquad: [],
+
+  init() {
+    const sel = document.getElementById('teamSelect');
+    PL_TEAMS.forEach(t => sel.innerHTML += `<option value="${t}" ${t === this.userTeam ? 'selected' : ''}>${t}</option>`);
+    this.initSeason();
+  },
+
+  setPlayerTeam(name) {
+    this.userTeam = name;
+    document.getElementById('hdrTeam').innerText = name;
+    this.initSeason();
+  },
+
+  initSeason() {
+    this.table = {};
+    PL_TEAMS.forEach(t => {
+      this.table[t] = { m: 0, z: 0, r: 0, p: 0, gf: 0, ga: 0, gd: 0, pts: 0 };
+    });
+    this.currentMatchday = 1;
+    this.generateFixtures();
+    this.renderTable();
+    this.updateUI();
+  },
+
+  generateFixtures() {
+    this.fixtures = [];
+    for(let i=0; i<38; i++) {
+      let shifted = [...PL_TEAMS];
+      const fixIdx = i % shifted.length;
+      let opp = shifted[(fixIdx + 5) % shifted.length];
+      if(opp === this.userTeam) opp = shifted[(fixIdx + 1) % shifted.length];
+      this.fixtures.push({ round: i+1, home: this.userTeam, away: opp });
+    }
+  },
+
+  updateUI() {
+    document.getElementById('uiBudget').innerText = this.budget.toLocaleString() + ' €';
+    document.getElementById('uiOvr').innerText = this.ovr + ' OVR';
+    document.getElementById('uiMatchday').innerText = `${this.currentMatchday} / 38`;
+    
+    const curFix = this.fixtures[this.currentMatchday - 1];
+    if(curFix) {
+      document.getElementById('fixtureInfo').innerHTML = `Kolejka ${this.currentMatchday}: <strong>${curFix.home}</strong> vs <strong>${curFix.away}</strong>`;
+      document.getElementById('mHome').innerText = curFix.home;
+      document.getElementById('mAway').innerText = curFix.away;
+    }
+  },
+
+  renderTable() {
+    const sorted = Object.entries(this.table).sort((a,b) => b[1].pts - a[1].pts || b[1].gd - a[1].gd);
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    sorted.forEach(([t, s], idx) => {
+      tbody.innerHTML += `
+        <tr style="${t === this.userTeam ? 'background:rgba(16,185,129,0.1); font-weight:bold' : ''}">
+          <td>${idx+1}</td><td>${t}</td><td>${s.m}</td><td>${s.z}</td><td>${s.r}</td><td>${s.p}</td><td>${s.gf}:${s.ga}</td><td style="color:var(--gold)">${s.pts}</td>
+        </tr>
+      `;
+    });
+  },
+
+  renderMarket() {
+    const q = document.getElementById('playerSearch').value.toLowerCase();
+    const tbody = document.getElementById('marketBody');
+    tbody.innerHTML = '';
+    this.marketPlayers.filter(p => p.Name.toLowerCase().includes(q)).forEach(p => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${p.Name}</td><td>${p.Position}</td><td>${p.OVR}</td><td>${p.Value.toLocaleString()} €</td>
+          <td><button style="padding:4px 8px; font-size:0.75rem" onclick="Game.buyPlayer('${p.Name}', ${p.Value}, ${p.OVR}, '${p.Position}')">Kup</button></td>
+        </tr>
+      `;
+    });
+  },
+
+  buyPlayer(name, price, ovr, pos) {
+    if(this.budget >= price) {
+      this.budget -= price;
+      this.ovr = Math.min(99, this.ovr + 1);
+      this.marketPlayers = this.marketPlayers.filter(p => p.Name !== name);
+      this.mySquad.push({ Name: name, Position: pos, OVR: ovr });
+      this.renderMarket();
+      this.renderSquad();
+      this.updateUI();
+      alert(`Zakontraktowano: ${name}!`);
+    } else {
+      alert("Za mało budżetu!");
+    }
+  },
+
+  renderSquad() {
+    const tbody = document.getElementById('squadBody');
+    tbody.innerHTML = this.mySquad.map(p => `<tr><td>${p.Name}</td><td>${p.Position}</td><td>${p.OVR}</td></tr>`).join('');
+  },
+
+  parseCSVFile(input) {
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const lines = text.split('\n').slice(1);
+      this.marketPlayers = [];
+      lines.forEach(l => {
+        const cols = l.split(',');
+        if(cols.length >= 5) {
+          const name = cols[2]?.trim();
+          const ovr = parseInt(cols[4]) || 75;
+          if(name) {
+            this.marketPlayers.push({ Name: name, Position: cols[3]?.trim() || 'CM', OVR: ovr, Value: ovr * 400000 });
+          }
+        }
+      });
+      this.renderMarket();
+      alert("Pomyślnie wczytano plik CSV z bazą zawodników!");
+    };
+    reader.readAsText(file);
+  },
+
+  switchTab(tabId, el) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+    el.classList.add('active');
+    
+    if(tabId === 'hub') document.getElementById('hubView').classList.add('active');
+    if(tabId === 'table') { document.getElementById('tableView').classList.add('active'); this.renderTable(); }
+    if(tabId === 'transfers') { document.getElementById('transfersView').classList.add('active'); this.renderMarket(); }
+    if(tabId === 'match') document.getElementById('matchView').classList.add('active');
+  }
+};
+
+const MatchEngine = {
+  startMatch() {
+    const fix = Game.fixtures[Game.currentMatchday - 1];
+    if(!fix) { alert("Koniec sezonu!"); return; }
+    
+    let min = 0;
+    let hG = 0; let aG = 0;
+    const log = document.getElementById('matchLog');
+    const score = document.getElementById('mScore');
+    log.innerHTML = `[0'] Pierwszy gwizdek: ${fix.home} vs ${fix.away}<br>`;
+    
+    const interval = setInterval(() => {
+      min += 15;
+      if(min === 30) log.innerHTML += `[${min}'] Asymetryczny overload lewą stroną.<br>`;
+      if(min === 45) { hG++; log.innerHTML += `[${min}'] ⚽ GOOOL! Wykończenie z cutbacku w Strefie 14! (${fix.home} 1-0)<br>`; }
+      if(min === 60) log.innerHTML += `[${min}'] Anti-Zirkzee shadow odcina rywala.<br>`;
+      if(min === 75 && Math.random() > 0.4) { aG++; log.innerHTML += `[${min}'] Bramka dla przeciwnika. (${fix.home} 1-1)<br>`; }
+      
+      score.innerText = `${hG} - ${aG}`;
+      log.scrollTop = log.scrollHeight;
+      
+      if(min >= 90) {
+        clearInterval(interval);
+        log.innerHTML += `<strong>Koniec spotkania! Wynik końcowy: ${hG} - ${aG}</strong><br>`;
+        
+        const th = Game.table[fix.home];
+        const ta = Game.table[fix.away];
+        th.m++; ta.m++;
+        th.gf += hG; th.ga += aG; ta.gf += aG; ta.ga += hG;
+        if(hG > aG) { th.z++; th.pts += 3; ta.p++; }
+        else if(hG < aG) { ta.z++; ta.pts += 3; th.p++; }
+        else { th.r++; th.pts += 1; ta.r++; ta.pts += 1; }
+        th.gd = th.gf - th.ga; ta.gd = ta.gf - ta.ga;
+        
+        Game.currentMatchday = Math.min(38, Game.currentMatchday + 1);
+        Game.updateUI();
+        Game.renderTable();
+      }
+    }, 200);
+  }
+};
+
+Game.init();
+</script>
 </body>
 </html>
