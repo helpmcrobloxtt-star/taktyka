@@ -2,152 +2,324 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Bank Pro – Moduł Rodziny</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Apex Bank Pro – Moduł Zaawansowany Rodziny</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0A0E1A;--panel:rgba(255,255,255,0.045);--panel-solid:#121729;
-    --panel-border:rgba(255,255,255,0.08);--primary:#10B981;--primary-dim:rgba(16,185,129,0.15);
-    --gold:#F0B93F;--danger:#EF4444;--text:#E7ECF3;--muted:#8B96AB;
+  :root {
+    --bg: #070A14;
+    --panel: rgba(255, 255, 255, 0.038);
+    --panel-solid: #0F1628;
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --primary: #10B981;
+    --primary-dim: rgba(16, 185, 129, 0.15);
+    --gold: #F59E0B;
+    --gold-dim: rgba(245, 158, 11, 0.15);
+    --danger: #EF4444;
+    --danger-dim: rgba(239, 68, 68, 0.15);
+    --info: #3B82F6;
+    --info-dim: rgba(59, 130, 246, 0.15);
+    --text: #F3F4F6;
+    --muted: #9CA3AF;
   }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;padding:24px;min-height:100vh;}
-  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;border-bottom:1px solid var(--panel-border);padding-bottom:16px;}
-  h1{font-family:'Space Grotesk',sans-serif;font-size:24px;color:#fff;}
-  .back-btn{background:var(--panel);color:var(--text);border:1px solid var(--panel-border);padding:8px 16px;border-radius:999px;text-decoration:none;font-size:13px;font-weight:600;}
-  .grid{display:grid;grid-template-columns:1fr 2fr;gap:20px;}
-  @media(max-width:900px){.grid{grid-template-columns:1fr;}}
-  .card{background:var(--panel-solid);border:1px solid var(--panel-border);border-radius:16px;padding:20px;margin-bottom:16px;}
-  .card-title{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;}
-  .value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;}
-  .btn{background:var(--primary);color:#04140D;border:none;padding:10px 16px;border-radius:999px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;}
-  .btn-danger{background:var(--danger);color:#fff;}
-  select, input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--panel-border);background:var(--bg);color:var(--text);margin-top:6px;margin-bottom:12px;outline:none;}
-  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;}
-  th, td{padding:10px;text-align:left;border-bottom:1px solid var(--panel-border);}
-  th{color:var(--muted);font-size:11px;text-transform:uppercase;}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(circle at 10% 5%, rgba(16, 185, 129, 0.1), transparent 45%),
+                radial-gradient(circle at 90% 95%, rgba(59, 130, 246, 0.08), transparent 45%),
+                var(--bg);
+    color: var(--text); font-family: 'Inter', sans-serif; padding: 20px; min-height: 100vh;
+  }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--panel-border); padding-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #fff; }
+  .logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--gold)); display: flex; align-items: center; justify-content: center; color: #04140D; font-weight: 700; }
+  .back-btn { background: var(--panel); color: var(--text); border: 1px solid var(--panel-border); padding: 8px 16px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 600; }
+  
+  .top-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  @media(max-width:900px) { .top-stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card { background: var(--panel-solid); border: 1px solid var(--panel-border); border-radius: 14px; padding: 16px; }
+  .stat-label { font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+  .stat-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; }
+  
+  .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+  @media(max-width:950px) { .grid { grid-template-columns: 1fr; } }
+  
+  .card { background: var(--panel-solid); border: 1px solid var(--panel-border); border-radius: 16px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); }
+  .card-title { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+  
+  .btn { background: var(--primary); color: #04140D; border: none; padding: 10px 16px; border-radius: 999px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; font-size: 13px; }
+  .btn-gold { background: var(--gold); }
+  .btn-danger { background: var(--danger); color: #fff; width: auto; padding: 4px 10px; margin: 0; font-size: 11px; }
+  
+  select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border); background: var(--bg); color: var(--text); margin-top: 6px; margin-bottom: 12px; outline: none; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  th, td { padding: 9px; text-align: left; border-bottom: 1px solid var(--panel-border); }
+  th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+  .badge { padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; }
+  .badge.green { background: var(--primary-dim); color: var(--primary); }
+  .badge.gold { background: var(--gold-dim); color: var(--gold); }
+  
+  .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: var(--panel-solid); border: 1px solid var(--panel-border); padding: 10px 16px; border-radius: 8px; font-size: 12.5px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 3px solid var(--primary); }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>👨‍👩‍👧‍👦 Zaawansowany Moduł Rodziny</h1>
-  <a href="index.html" class="back-btn">← Powrót do Głównego Menu</a>
+  <div class="brand"><div class="logo">A</div> Apex Bank Pro – Dom i Rynek</div>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <span class="badge gold" id="dateBadge" style="font-size:12px; padding:6px 12px;">Miesiąc 1 / 2026</span>
+    <a href="index.html" class="back-btn">← Główne Menu</a>
+  </div>
+</div>
+
+<div class="top-stats">
+  <div class="stat-card">
+    <div class="stat-label">Skarbiec Rodzinny</div>
+    <div class="stat-val" id="familyPoolVal" style="color:var(--gold);">0.00 zł</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Aktywny Domownik</div>
+    <div class="stat-val" id="activeBalVal">0.00 zł</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Konto Oszczędnościowe</div>
+    <div class="stat-val" id="activeSavVal" style="color:var(--primary);">0.00 zł</div>
+  </div>
+  <div class="stat-card">
+    <button class="btn" style="margin-top:0; height:100%; background:linear-gradient(135deg,var(--primary),var(--info)); color:#fff;" onclick="advanceMonth()">⏩ Przejdź o 1 miesiąc</button>
+  </div>
 </div>
 
 <div class="grid">
   <div>
     <div class="card">
-      <div class="card-title"><span>Aktywny domownik</span></div>
-      <select id="activeMemberSelect" onchange="switchFamilyMember(this.value)"></select>
-      <div class="value" id="memberBalance">0.00 zł</div>
-      <p style="font-size:12px;color:var(--muted);margin-top:6px;">Oszczędności: <b id="memberSavings">0.00 zł</b></p>
-      <button class="btn" onclick="addFunds(200)">+ Wpłać 200 zł kieszonkowego</button>
+      <div class="card-title"><span>Wybierz domownika</span></div>
+      <select id="memberSelect" onchange="switchMember(this.value)"></select>
+      <div style="font-size:12px; color:var(--muted); margin-top:8px;">Zawód / Praca: <b id="memberJob" style="color:#fff;">Brak pracy</b></div>
+      <div style="font-size:12px; color:var(--muted);">Pensja miesięczna: <b id="memberSalary" style="color:var(--primary);">0.00 zł</b></div>
+      <button class="btn btn-gold" onclick="assignJobPrompt()">💼 Zmień / Znajdź pracę</button>
     </div>
 
     <div class="card">
-      <div class="card-title"><span>Dodaj członka rodziny</span></div>
-      <label style="font-size:12px;color:var(--muted)">Imię i Rola</label>
-      <input type="text" id="newMemberName" placeholder="np. Zosia (Córka)">
-      <button class="btn" onclick="createNewMember()">+ Dodaj do bazy</button>
+      <div class="card-title"><span>Finanse osobiste</span></div>
+      <input type="number" id="transAmt" placeholder="Kwota do wpłaty/wypłaty">
+      <button class="btn" onclick="transferToSavings()">Przelew na Oszczędnościowe</button>
+      <button class="btn btn-gold" onclick="transferToFamilyPool()">Wpłać do Skarbca Rodziny</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Dodaj domownika</span></div>
+      <input type="text" id="newMemberName" placeholder="Imię i rola (np. Kuba - Syn)">
+      <button class="btn" onclick="addNewMember()">+ Dodaj do rodziny</button>
     </div>
   </div>
 
   <div>
     <div class="card">
-      <div class="card-title"><span>Wszyscy domownicy i ich budżety</span></div>
+      <div class="card-title"><span>Giełda Krypto (Panel Wzrostowy 🚀)</span><span class="badge green">Bessa zniszczona</span></div>
       <table>
-        <thead><tr><th>Imię / Rola</th><th>Saldo</th><th>Akcja</th></tr></thead>
-        <tbody id="familyTableBody"></tbody>
+        <thead><tr><th>Krypto</th><th>Cena</th><th>Posiadasz</th><th>Akcja</th></tr></thead>
+        <tbody id="cryptoTable"></tbody>
       </table>
     </div>
 
     <div class="card">
-      <div class="card-title"><span>Historia finansowa rodziny</span></div>
+      <div class="card-title"><span>Surowce i Obligacje Skarbowe</span></div>
       <table>
-        <thead><tr><th>Kategoria</th><th>Kwota</th><th>Opis</th></tr></thead>
-        <tbody id="familyHistoryBody"></tbody>
+        <thead><tr><th>Aktywo</th><th>Cena / Zysk</th><th>Posiadasz</th><th>Akcja</th></tr></thead>
+        <tbody id="marketTable"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Lista członków rodziny</span></div>
+      <table>
+        <thead><tr><th>Domownik</th><th>Saldo</th><th>Oszczędności</th><th>Usuń</th></tr></thead>
+        <tbody id="familyListBody"></tbody>
       </table>
     </div>
   </div>
 </div>
 
+<div class="toast-container" id="toastContainer"></div>
+
 <script>
-const STORAGE_KEY = 'apexFamilyModuleDB_v2';
-let familyData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-  activeId: 'u_1',
+const DB_KEY = 'apexFamilyFullDB_v5';
+let simState = JSON.parse(localStorage.getItem(DB_KEY)) || {
+  month: 1, year: 2026,
+  familyPool: 5000,
+  activeId: 'm1',
   members: {
-    'u_1': {id:'u_1', name:'Adam (Głowa rodziny)', balance:4500, savings:1200, history:[]},
-    'u_2': {id:'u_2', name:'Anna (Małżonka)', balance:3200, savings:2500, history:[]}
+    'm1': { id:'m1', name:'Adam (Szef Rodziny)', balance:6200, savings:2400, job:'Programista AI', salary:5500, krypto:{btc:0.1, eth:0.5} },
+    'm2': { id:'m2', name:'Anna (Małżonka)', balance:4100, savings:3000, job:'Menedżer', salary:4200, krypto:{btc:0.05, eth:0.2} }
+  },
+  crypto: {
+    btc: { name:'Bitcoin (BTC)', price: 340000, growth: 0.08 },
+    eth: { name:'Ethereum (ETH)', price: 14000, growth: 0.09 },
+    sol: { name:'Solana (SOL)', price: 680, growth: 0.12 }
+  },
+  market: {
+    gold: { name:'Złoto (oz)', price: 8900, type:'surowiec', yield:0.03 },
+    bonds: { name:'Obligacje 10Y', price: 1000, type:'obligacja', yield:0.055 }
   }
 };
 
-function saveState(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(familyData));
+function saveAndRender() {
+  localStorage.setItem(DB_KEY, JSON.stringify(simState));
   renderAll();
 }
 
-function switchFamilyMember(id){
-  familyData.activeId = id;
-  saveState();
+function showToast(msg) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
 }
 
-function createNewMember(){
+function switchMember(id) {
+  simState.activeId = id;
+  saveAndRender();
+}
+
+function addNewMember() {
   const name = document.getElementById('newMemberName').value.trim();
   if(!name) return alert('Wpisz imię członka rodziny!');
-  const id = 'u_' + Date.now();
-  familyData.members[id] = {id, name, balance:1000, savings:300, history:[]};
+  const id = 'm_' + Date.now();
+  simState.members[id] = { id, name, balance:1500, savings:500, job:'Praktykant', salary:1800, krypto:{btc:0, eth:0} };
   document.getElementById('newMemberName').value = '';
-  familyData.activeId = id;
-  saveState();
+  simState.activeId = id;
+  saveAndRender();
+  showToast(`Dodano członka: ${name}`);
 }
 
-function removeMember(id){
-  if(Object.keys(familyData.members).length <= 1) return alert('Musisz zostawić chociaż jednego członka rodziny!');
-  delete familyData.members[id];
-  familyData.activeId = Object.keys(familyData.members)[0];
-  saveState();
+function removeMember(id) {
+  if(Object.keys(simState.members).length <= 1) return alert('Musisz zostawić minimum jedną osobę!');
+  delete simState.members[id];
+  simState.activeId = Object.keys(simState.members)[0];
+  saveAndRender();
 }
 
-function addFunds(amt){
-  const m = familyData.members[familyData.activeId];
-  m.balance += amt;
-  m.history.unshift({category:'Wpływ', amount:amt, desc:'Kieszonkowe / Wpłata domowa'});
-  saveState();
+function assignJobPrompt() {
+  const m = simState.members[simState.activeId];
+  const jobs = [
+    { title: 'Kasjer wmarkecie', sal: 2800 },
+    { title: 'Specjalista Marketingu', sal: 4500 },
+    { title: 'Senior Software Dev', sal: 7800 },
+    { title: 'Dyrektor Finansowy', sal: 12500 }
+  ];
+  let choice = prompt(`Wybierz numer pracy dla ${m.name}:\n1. Kasjer (2800 zł)\n2. Marketing (4500 zł)\n3. Dev (7800 zł)\n4. Dyrektor (12500 zł)`);
+  if(choice >= 1 && choice <= 4) {
+    m.job = jobs[choice-1].title;
+    m.salary = jobs[choice-1].sal;
+    saveAndRender();
+    showToast(`Zmieniono pracę dla ${m.name} na ${m.job}!`);
+  }
 }
 
-function renderAll(){
-  const sel = document.getElementById('activeMemberSelect');
+function transferToSavings() {
+  const amt = parseFloat(document.getElementById('transAmt').value);
+  const m = simState.members[simState.activeId];
+  if(isNaN(amt) || amt <= 0 || m.balance < amt) return alert('Błędna kwota lub brak środków!');
+  m.balance -= amt;
+  m.savings += amt;
+  document.getElementById('transAmt').value = '';
+  saveAndRender();
+  showToast('Przelano środki na konto oszczędnościowe!');
+}
+
+function transferToFamilyPool() {
+  const amt = parseFloat(document.getElementById('transAmt').value);
+  const m = simState.members[simState.activeId];
+  if(isNaN(amt) || amt <= 0 || m.balance < amt) return alert('Błędna kwota lub brak środków!');
+  m.balance -= amt;
+  simState.familyPool += amt;
+  document.getElementById('transAmt').value = '';
+  saveAndRender();
+  showToast('Wpłacono pieniądze do skarbca rodziny!');
+}
+
+function buyCrypto(key) {
+  const m = simState.members[simState.activeId];
+  const c = simState.crypto[key];
+  if(m.balance < c.price * 0.1) return alert('Za mało środków na zakup ułamka krypto!');
+  m.balance -= c.price * 0.1;
+  m.krypto[key] = (m.krypto[key] || 0) + 0.1;
+  saveAndRender();
+  showToast(`Zakupiono 0.1 ${key.toUpperCase()}!`);
+}
+
+function advanceMonth() {
+  simState.month++;
+  if(simState.month > 12) { simState.month = 1; simState.year++; }
+  
+  // Wypłaty dla wszystkich + wzrost krypto (zawsze w górę!)
+  Object.values(simState.members).forEach(m => {
+    // Odlicz podatki (ok. 12% od pensji)
+    const tax = m.salary * 0.12;
+    const net = m.salary - tax;
+    m.balance += net;
+    // Odsetki oszczędnościowe
+    m.savings *= 1.004;
+  });
+
+  // Wzrost kryptowalut (pewniak wzrostowy)
+  Object.keys(simState.crypto).forEach(k => {
+    simState.crypto[k].price *= (1 + simState.crypto[k].growth);
+  });
+
+  saveAndRender();
+  showToast('⏩ Minął miesiąc! Wypłaty wpłynęły, krypto poszło w górę!');
+}
+
+function renderAll() {
+  document.getElementById('dateBadge').textContent = `Miesiąc ${simState.month} / ${simState.year}`;
+  document.getElementById('familyPoolVal').textContent = simState.familyPool.toFixed(2) + ' zł';
+
+  const sel = document.getElementById('memberSelect');
   sel.innerHTML = '';
-  const tbody = document.getElementById('familyTableBody');
-  tbody.innerHTML = '';
-  const histBody = document.getElementById('familyHistoryBody');
-  histBody.innerHTML = '';
+  const famBody = document.getElementById('familyListBody');
+  famBody.innerHTML = '';
 
-  Object.values(familyData.members).forEach(m => {
-    // Select options
+  Object.values(simState.members).forEach(m => {
     const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.textContent = m.name;
-    if(m.id === familyData.activeId) opt.selected = true;
+    opt.value = m.id; opt.textContent = m.name;
+    if(m.id === simState.activeId) opt.selected = true;
     sel.appendChild(opt);
 
-    // Table rows
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${m.name}</b></td><td>${m.balance.toFixed(2)} zł</td><td><button class="btn btn-danger" style="width:auto;padding:4px 10px;margin:0" onclick="removeMember('${m.id}')">Usuń</button></td>`;
-    tbody.appendChild(tr);
+    tr.innerHTML = `<td><b>${m.name}</b></td><td>${m.balance.toFixed(2)} zł</td><td>${m.savings.toFixed(2)} zł</td><td><button class="btn btn-danger" onclick="removeMember('${m.id}')">Usuń</button></td>`;
+    famBody.appendChild(tr);
 
-    // History
-    if(m.id === familyData.activeId){
-      document.getElementById('memberBalance').textContent = m.balance.toFixed(2) + ' zł';
-      document.getElementById('memberSavings').textContent = m.savings.toFixed(2) + ' zł';
-      m.history.forEach(h => {
-        const htr = document.createElement('tr');
-        htr.innerHTML = `<td>${h.category}</td><td style="color:var(--primary)">+${h.amount} zł</td><td>${h.desc}</td>`;
-        histBody.appendChild(htr);
-      });
+    if(m.id === simState.activeId) {
+      document.getElementById('activeBalVal').textContent = m.balance.toFixed(2) + ' zł';
+      document.getElementById('activeSavVal').textContent = m.savings.toFixed(2) + ' zł';
+      document.getElementById('memberJob').textContent = m.job;
+      document.getElementById('memberSalary').textContent = m.salary.toFixed(2) + ' zł';
     }
+  });
+
+  // Krypto render
+  const cryptoBody = document.getElementById('cryptoTable');
+  cryptoBody.innerHTML = '';
+  const activeM = simState.members[simState.activeId];
+  Object.keys(simState.crypto).forEach(k => {
+    const c = simState.crypto[k];
+    const owned = (activeM.krypto[k] || 0).toFixed(3);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><b>${c.name}</b></td><td style="color:var(--primary); font-family:'JetBrains Mono'">${c.price.toFixed(2)} zł</td><td>${owned}</td><td><button class="btn" style="width:auto; padding:4px 10px; margin:0;" onclick="buyCrypto('${k}')">+0.1 Kup</button></td>`;
+    cryptoBody.appendChild(tr);
+  });
+
+  // Rynek surowców
+  const mktBody = document.getElementById('marketTable');
+  mktBody.innerHTML = '';
+  Object.keys(simState.market).forEach(k => {
+    const item = simState.market[k];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><b>${item.name}</b></td><td>${item.price.toFixed(2)} zł</td><td>Aktywny</td><td><span class="badge green">Zysk stabilny</span></td>`;
+    mktBody.appendChild(tr);
   });
 }
 
