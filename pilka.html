@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Apex Bank Pro – Menedżer Piłkarski Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070A14;
+    --panel: rgba(255, 255, 255, 0.038);
+    --panel-solid: #0F1628;
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --primary: #10B981;
+    --primary-dim: rgba(16, 185, 129, 0.15);
+    --gold: #F59E0B;
+    --info: #3B82F6;
+    --text: #F3F4F6;
+    --muted: #9CA3AF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(circle at 10% 5%, rgba(16, 185, 129, 0.1), transparent 45%),
+                radial-gradient(circle at 90% 95%, rgba(59, 130, 246, 0.08), transparent 45%),
+                var(--bg);
+    color: var(--text); font-family: 'Inter', sans-serif; padding: 20px; min-height: 100vh;
+  }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--panel-border); padding-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #fff; }
+  .logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--gold)); display: flex; align-items: center; justify-content: center; color: #04140D; font-weight: 700; }
+  .back-btn { background: var(--panel); color: var(--text); border: 1px solid var(--panel-border); padding: 8px 16px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 600; }
+  
+  .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media(max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; } }
+  
+  .card { background: var(--panel-solid); border: 1px solid var(--panel-border); border-radius: 16px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); }
+  .card-title { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+  
+  select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border); background: var(--bg); color: var(--text); margin-top: 6px; margin-bottom: 12px; outline: none; font-size: 13px; }
+  .btn { background: var(--primary); color: #04140D; border: none; padding: 10px 16px; border-radius: 999px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; font-size: 13px; transition: transform .1s; }
+  .btn:hover { transform: translateY(-1px); }
+  
+  .pitch-preview { width: 100%; height: 220px; background: linear-gradient(135deg, #064e3b, #047857); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand"><div class="logo">⚽</div> Centrum Dowodzenia Klubu</div>
+  <a href="index.html" class="back-btn">← Powrót do Hubu</a>
+</div>
+
+<div class="grid-layout">
+  <div>
+    <div class="card">
+      <div class="card-title"><span>Formacja Zespołu</span></div>
+      <select id="formationSelect">
+        <option value="4-3-3">4-3-3 (Ofensywna)</option>
+        <option value="4-2-3-1">4-2-3-1 (Zbalansowana)</option>
+        <option value="3-5-2">3-5-2 (Asymetryczna / Overload)</option>
+        <option value="5-4-1">5-4-1 (Defensywna)</option>
+      </select>
+      
+      <div class="card-title" style="margin-top:14px;"><span>Styl Pressingu</span></div>
+      <select id="pressingSelect">
+        <option value="high">Wysoki i agresywny pressing</option>
+        <option value="mid">Średni blok</option>
+        <option value="low">Głęboka obrona (Low block)</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title"><span>Podgląd Taktyczny</span></div>
+      <div class="pitch-preview" id="pitchArea">Boisko / Układ Kółek</div>
+      <button class="btn" onclick="triggerMatchSim()">Rozpocznij Symulację Meczu</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title"><span>Krycie i Wytyczne</span></div>
+      <select id="markingSelect">
+        <option value="zone">Krycie strefowe</option>
+        <option value="man">Krycie indywidualne (Shadow)</option>
+      </select>
+      
+      <div class="card-title" style="margin-top:14px;"><span>Styl Ataku</span></div>
+      <select id="attackStyle">
+        <option value="low_cross">Niskie dośrodkowania i cutbacki</option>
+        <option value="direct">Szybkie przejścia (Transitions)</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/database.js"></script>
+<script src="js/club.js"></script>
+<script src="js/market.js"></script>
+<script src="js/tactics.js"></script>
+<script src="js/match_engine.js"></script>
+<script src="js/match_visual.js"></script>
+<script src="js/stats_heatmap.js"></script>
+<script src="js/multiplayer.js"></script>
+<script src="js/ui_main.js"></script>
+
+<script>
+  function triggerMatchSim() {
+    alert("Moduł symulacji meczu zostanie uruchomiony za niedługo!");
+  }
+</script>
+
+</body>
+</html>
