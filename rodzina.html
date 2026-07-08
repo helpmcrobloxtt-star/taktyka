@@ -46,7 +46,8 @@
   .card { background: var(--panel-solid); border: 1px solid var(--panel-border); border-radius: 16px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); }
   .card-title { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
   
-  .btn { background: var(--primary); color: #04140D; border: none; padding: 10px 16px; border-radius: 999px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; font-size: 13px; }
+  .btn { background: var(--primary); color: #04140D; border: none; padding: 10px 16px; border-radius: 999px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; font-size: 13px; transition: 0.2s; }
+  .btn:hover { opacity: 0.9; }
   .btn-gold { background: var(--gold); }
   .btn-danger { background: var(--danger); color: #fff; width: auto; padding: 4px 10px; margin: 0; font-size: 11px; }
   
@@ -59,7 +60,7 @@
   .badge.gold { background: var(--gold-dim); color: var(--gold); }
   
   .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-  .toast { background: var(--panel-solid); border: 1px solid var(--panel-border); padding: 10px 16px; border-radius: 8px; font-size: 12.5px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 3px solid var(--primary); }
+  .toast { background: var(--panel-solid); border: 1px solid var(--panel-border); padding: 10px 16px; border-radius: 8px; font-size: 12.5px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 3px solid var(--primary); color: #fff; }
 </style>
 </head>
 <body>
@@ -86,7 +87,7 @@
     <div class="stat-val" id="activeSavVal" style="color:var(--primary);">0.00 zł</div>
   </div>
   <div class="stat-card">
-    <button class="btn" style="margin-top:0; height:100%; background:linear-gradient(135deg,var(--primary),var(--info)); color:#fff;" onclick="advanceMonth()">⏩ Przejdź o 1 miesiąc</button>
+    <button class="btn" id="advanceBtn" style="margin-top:0; height:100%; background:linear-gradient(135deg,var(--primary),var(--info)); color:#fff;" onclick="advanceMonth(event)">⏩ Przejdź o 1 miesiąc</button>
   </div>
 </div>
 
@@ -97,14 +98,29 @@
       <select id="memberSelect" onchange="switchMember(this.value)"></select>
       <div style="font-size:12px; color:var(--muted); margin-top:8px;">Zawód / Praca: <b id="memberJob" style="color:#fff;">Brak pracy</b></div>
       <div style="font-size:12px; color:var(--muted);">Pensja miesięczna: <b id="memberSalary" style="color:var(--primary);">0.00 zł</b></div>
-      <button class="btn btn-gold" onclick="assignJobPrompt()">💼 Zmień / Znajdź pracę</button>
+      <button class="btn btn-gold" onclick="assignJobPrompt()">💼 Szybki wybór zawodu</button>
     </div>
 
     <div class="card">
-      <div class="card-title"><span>Finanse osobiste</span></div>
-      <input type="number" id="transAmt" placeholder="Kwota do wpłaty/wypłaty">
+      <div class="card-title"><span>Konfiguracja Pracy</span></div>
+      <input type="text" id="jobTitle" placeholder="Nazwa zawodu">
+      <input type="number" id="jobSalary" placeholder="Miesięczna wypłata (netto)">
+      <button class="btn btn-gold" onclick="updateJob()">Zapisz zawód i zarobki</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Operacje Finansowe / Przelewy</span></div>
+      <select id="transferTarget">
+        <option value="shop">🛒 Zakupy / Wydatki (Skarbiec)</option>
+      </select>
+      <input type="number" id="transferAmt" placeholder="Kwota operacji">
+      <button class="btn" onclick="makeTransfer()">Wykonaj przelew / Wydatek</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Finanse osobiste (Oszczędności)</span></div>
+      <input type="number" id="transAmt" placeholder="Kwota na oszczędności">
       <button class="btn" onclick="transferToSavings()">Przelew na Oszczędnościowe</button>
-      <button class="btn btn-gold" onclick="transferToFamilyPool()">Wpłać do Skarbca Rodziny</button>
     </div>
 
     <div class="card">
@@ -116,7 +132,7 @@
 
   <div>
     <div class="card">
-      <div class="card-title"><span>Giełda Krypto (Panel Wzrostowy 🚀)</span><span class="badge green">Bessa zniszczona</span></div>
+      <div class="card-title"><span>Giełda Krypto (Panel Wzrostowy 🚀)</span><span class="badge green">Stabilny wzrost</span></div>
       <table>
         <thead><tr><th>Krypto</th><th>Cena</th><th>Posiadasz</th><th>Akcja</th></tr></thead>
         <tbody id="cryptoTable"></tbody>
@@ -164,6 +180,8 @@ let simState = JSON.parse(localStorage.getItem(DB_KEY)) || {
   }
 };
 
+let isProcessing = false;
+
 function saveAndRender() {
   localStorage.setItem(DB_KEY, JSON.stringify(simState));
   renderAll();
@@ -171,6 +189,7 @@ function saveAndRender() {
 
 function showToast(msg) {
   const c = document.getElementById('toastContainer');
+  if(!c) return;
   const t = document.createElement('div');
   t.className = 'toast';
   t.textContent = msg;
@@ -185,7 +204,7 @@ function switchMember(id) {
 
 function addNewMember() {
   const name = document.getElementById('newMemberName').value.trim();
-  if(!name) return alert('Wpisz imię członka rodziny!');
+  if(!name) { alert('Wpisz imię członka rodziny!'); return; }
   const id = 'm_' + Date.now();
   simState.members[id] = { id, name, balance:1500, savings:500, job:'Praktykant', salary:1800, krypto:{btc:0, eth:0} };
   document.getElementById('newMemberName').value = '';
@@ -195,7 +214,7 @@ function addNewMember() {
 }
 
 function removeMember(id) {
-  if(Object.keys(simState.members).length <= 1) return alert('Musisz zostawić minimum jedną osobę!');
+  if(Object.keys(simState.members).length <= 1) { alert('Musisz zostawić minimum jedną osobę!'); return; }
   delete simState.members[id];
   simState.activeId = Object.keys(simState.members)[0];
   saveAndRender();
@@ -204,7 +223,7 @@ function removeMember(id) {
 function assignJobPrompt() {
   const m = simState.members[simState.activeId];
   const jobs = [
-    { title: 'Kasjer wmarkecie', sal: 2800 },
+    { title: 'Kasjer w markecie', sal: 2800 },
     { title: 'Specjalista Marketingu', sal: 4500 },
     { title: 'Senior Software Dev', sal: 7800 },
     { title: 'Dyrektor Finansowy', sal: 12500 }
@@ -218,10 +237,24 @@ function assignJobPrompt() {
   }
 }
 
+function updateJob() {
+  const m = simState.members[simState.activeId];
+  const title = document.getElementById('jobTitle').value.trim();
+  const sal = parseFloat(document.getElementById('jobSalary').value);
+  if(!title || isNaN(sal)) { alert("Uzupełnij poprawnie dane!"); return; }
+  
+  m.job = title;
+  m.salary = sal;
+  document.getElementById('jobTitle').value = '';
+  document.getElementById('jobSalary').value = '';
+  saveAndRender();
+  showToast("Zaktualizowano dane zawodowe!");
+}
+
 function transferToSavings() {
   const amt = parseFloat(document.getElementById('transAmt').value);
   const m = simState.members[simState.activeId];
-  if(isNaN(amt) || amt <= 0 || m.balance < amt) return alert('Błędna kwota lub brak środków!');
+  if(isNaN(amt) || amt <= 0 || m.balance < amt) { alert('Błędna kwota lub brak środków!'); return; }
   m.balance -= amt;
   m.savings += amt;
   document.getElementById('transAmt').value = '';
@@ -229,48 +262,66 @@ function transferToSavings() {
   showToast('Przelano środki na konto oszczędnościowe!');
 }
 
-function transferToFamilyPool() {
-  const amt = parseFloat(document.getElementById('transAmt').value);
-  const m = simState.members[simState.activeId];
-  if(isNaN(amt) || amt <= 0 || m.balance < amt) return alert('Błędna kwota lub brak środków!');
-  m.balance -= amt;
-  simState.familyPool += amt;
-  document.getElementById('transAmt').value = '';
+function makeTransfer() {
+  const target = document.getElementById('transferTarget').value;
+  const amt = parseFloat(document.getElementById('transferAmt').value);
+  const sender = simState.members[simState.activeId];
+  
+  if(isNaN(amt) || amt <= 0 || sender.balance < amt) { alert("Brak środków lub zła kwota!"); return; }
+  
+  sender.balance -= amt;
+  if(target === 'shop') {
+    simState.familyPool += amt;
+    showToast("Wydatki zaksięgowane w skarbcu!");
+  } else {
+    simState.members[target].balance += amt;
+    showToast(`Przelano ${amt.toFixed(2)} zł do ${simState.members[target].name}`);
+  }
+  document.getElementById('transferAmt').value = '';
   saveAndRender();
-  showToast('Wpłacono pieniądze do skarbca rodziny!');
 }
 
 function buyCrypto(key) {
   const m = simState.members[simState.activeId];
   const c = simState.crypto[key];
-  if(m.balance < c.price * 0.1) return alert('Za mało środków na zakup ułamka krypto!');
+  if(m.balance < c.price * 0.1) { alert('Za mało środków na zakup ułamka krypto!'); return; }
   m.balance -= c.price * 0.1;
   m.krypto[key] = (m.krypto[key] || 0) + 0.1;
   saveAndRender();
   showToast(`Zakupiono 0.1 ${key.toUpperCase()}!`);
 }
 
-function advanceMonth() {
-  simState.month++;
-  if(simState.month > 12) { simState.month = 1; simState.year++; }
+function advanceMonth(event) {
+  if(isProcessing) return;
+  isProcessing = true;
   
-  // Wypłaty dla wszystkich + wzrost krypto (zawsze w górę!)
-  Object.values(simState.members).forEach(m => {
-    // Odlicz podatki (ok. 12% od pensji)
-    const tax = m.salary * 0.12;
-    const net = m.salary - tax;
-    m.balance += net;
-    // Odsetki oszczędnościowe
-    m.savings *= 1.004;
-  });
+  const btn = event.target;
+  const origText = btn.textContent;
+  btn.textContent = "Symuluję...";
+  btn.style.opacity = "0.5";
 
-  // Wzrost kryptowalut (pewniak wzrostowy)
-  Object.keys(simState.crypto).forEach(k => {
-    simState.crypto[k].price *= (1 + simState.crypto[k].growth);
-  });
+  setTimeout(() => {
+    simState.month++;
+    if(simState.month > 12) { simState.month = 1; simState.year++; }
+    
+    Object.values(simState.members).forEach(m => {
+      const tax = m.salary * 0.12;
+      const net = m.salary - tax;
+      m.balance += net;
+      m.savings *= 1.004;
+    });
 
-  saveAndRender();
-  showToast('⏩ Minął miesiąc! Wypłaty wpłynęły, krypto poszło w górę!');
+    Object.keys(simState.crypto).forEach(k => {
+      simState.crypto[k].price *= (1 + simState.crypto[k].growth);
+    });
+
+    saveAndRender();
+    
+    isProcessing = false;
+    btn.textContent = origText;
+    btn.style.opacity = "1";
+    showToast('⏩ Minął miesiąc! Wypłaty wpłynęły, krypto poszło w górę!');
+  }, 1500);
 }
 
 function renderAll() {
@@ -282,11 +333,18 @@ function renderAll() {
   const famBody = document.getElementById('familyListBody');
   famBody.innerHTML = '';
 
+  const targetSel = document.getElementById('transferTarget');
+  targetSel.innerHTML = '<option value="shop">🛒 Zakupy / Wydatki (Skarbiec)</option>';
+
   Object.values(simState.members).forEach(m => {
     const opt = document.createElement('option');
     opt.value = m.id; opt.textContent = m.name;
     if(m.id === simState.activeId) opt.selected = true;
     sel.appendChild(opt);
+
+    if(m.id !== simState.activeId) {
+      targetSel.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+    }
 
     const tr = document.createElement('tr');
     tr.innerHTML = `<td><b>${m.name}</b></td><td>${m.balance.toFixed(2)} zł</td><td>${m.savings.toFixed(2)} zł</td><td><button class="btn btn-danger" onclick="removeMember('${m.id}')">Usuń</button></td>`;
@@ -300,7 +358,6 @@ function renderAll() {
     }
   });
 
-  // Krypto render
   const cryptoBody = document.getElementById('cryptoTable');
   cryptoBody.innerHTML = '';
   const activeM = simState.members[simState.activeId];
@@ -312,7 +369,6 @@ function renderAll() {
     cryptoBody.appendChild(tr);
   });
 
-  // Rynek surowców
   const mktBody = document.getElementById('marketTable');
   mktBody.innerHTML = '';
   Object.keys(simState.market).forEach(k => {
@@ -324,93 +380,6 @@ function renderAll() {
 }
 
 document.addEventListener('DOMContentLoaded', renderAll);
-<!-- Dodaj te nowe sekcje wewnątrz Twojego istniejącego pliku -->
-
-<!-- 1. PANEL EDYCJI PRACY (zamiast prompta) -->
-<div class="card">
-  <div class="card-title"><span>Konfiguracja Pracy</span></div>
-  <input type="text" id="jobTitle" placeholder="Nazwa zawodu">
-  <input type="number" id="jobSalary" placeholder="Miesięczna wypłata (netto)">
-  <button class="btn btn-gold" onclick="updateJob()">Zapisz zawód i zarobki</button>
-</div>
-
-<!-- 2. PANEL PRZELEWÓW I WYDATKÓW -->
-<div class="card">
-  <div class="card-title"><span>Operacje Finansowe</span></div>
-  <select id="transferTarget">
-    <option value="shop">🛒 Zakupy / Wydatki (Skarbiec)</option>
-    <!-- Opcje domowników zostaną wygenerowane przez JS -->
-  </select>
-  <input type="number" id="transferAmt" placeholder="Kwota operacji">
-  <button class="btn" onclick="makeTransfer()">Wykonaj przelew / Wydatek</button>
-</div>
-
-// --- FUNKCJE DODATKOWE ---
-
-// Funkcja cooldownu (blokada przycisku)
-let isProcessing = false;
-function advanceMonth() {
-  if(isProcessing) return;
-  isProcessing = true;
-  
-  const btn = event.target;
-  btn.textContent = "Symuluję...";
-  btn.style.opacity = "0.5";
-
-  // Logika miesiąca...
-  setTimeout(() => {
-    // Tutaj Twoja istniejąca logika naliczania pensji i krypto
-    simState.month++;
-    saveAndRender();
-    
-    isProcessing = false;
-    btn.textContent = "⏩ Przejdź o 1 miesiąc";
-    btn.style.opacity = "1";
-    showToast("Miesiąc zakończony!");
-  }, 3000); // 3 sekundy cooldownu
-}
-
-function updateJob() {
-  const m = simState.members[simState.activeId];
-  const title = document.getElementById('jobTitle').value;
-  const sal = parseFloat(document.getElementById('jobSalary').value);
-  if(!title || isNaN(sal)) return alert("Uzupełnij poprawnie dane!");
-  
-  m.job = title;
-  m.salary = sal;
-  saveAndRender();
-  showToast("Zaktualizowano dane zawodowe!");
-}
-
-function makeTransfer() {
-  const target = document.getElementById('transferTarget').value;
-  const amt = parseFloat(document.getElementById('transferAmt').value);
-  const sender = simState.members[simState.activeId];
-  
-  if(isNaN(amt) || amt <= 0 || sender.balance < amt) return alert("Brak środków!");
-  
-  sender.balance -= amt;
-  if(target === 'shop') {
-    simState.familyPool += amt;
-    showToast("Wydatki zaksięgowane w skarbcu!");
-  } else {
-    simState.members[target].balance += amt;
-    showToast(`Przelano ${amt} zł do ${simState.members[target].name}`);
-  }
-  saveAndRender();
-}
-
-// Zaktualizuj renderAll, aby dodawał domowników do selecta przelewów
-function renderAll() {
-  // ... (reszta Twojego kodu renderAll)
-  const targetSel = document.getElementById('transferTarget');
-  targetSel.innerHTML = '<option value="shop">🛒 Zakupy / Wydatki (Skarbiec)</option>';
-  Object.values(simState.members).forEach(m => {
-    if(m.id !== simState.activeId) {
-      targetSel.innerHTML += `<option value="${m.id}">${m.name}</option>`;
-    }
-  });
-}
 </script>
 
 </body>
