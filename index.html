@@ -407,6 +407,228 @@ console.log('✅ Apex Bank Pro v5.0 – ZSYNCHRONIZOWANY!');
 }
 
 document.addEventListener('DOMContentLoaded',init);
+
+<!-- ===== SAMOUCZEK / INSTRUKCJA ===== -->
+// ============================================================
+// SAMOUCZEK APEX BANK PRO – DODATEK
+// ============================================================
+
+function renderTutorialView(){
+  const content = document.getElementById('contentArea');
+  
+  document.getElementById('pageTitle').textContent = '📖 Samouczek';
+  document.getElementById('pageSub').textContent = 'Jak korzystać z Apex Bank Pro';
+  
+  let html = `
+  <div class="section-head">
+    <div class="section-title">📖 Samouczek dla rodzeństwa</div>
+  </div>
+  
+  <div class="card" style="border-color:var(--gold);">
+    <div class="card-title">🔥 NAJWAŻNIEJSZE – SYNC (wspólne dane)</div>
+    <div style="font-size:13px;color:var(--muted);">
+      <div style="padding:8px 0;border-bottom:1px solid var(--panel-border);">
+        <strong>📤 EKSPORT (osoba z aktualnymi danymi):</strong><br>
+        1. Kliknij przycisk <span class="badge gold">Sync</span> w lewym menu<br>
+        2. Wybierz <strong>"Eksportuj plik"</strong><br>
+        3. Plik .json zostanie pobrany na telefon<br>
+        4. Wyślij ten plik rodzeństwu (WhatsApp / Bluetooth / email)
+      </div>
+      <div style="padding:8px 0;">
+        <strong>📥 IMPORT (pozostałe osoby):</strong><br>
+        1. Pobierz plik .json od rodzeństwa<br>
+        2. W aplikacji kliknij <span class="badge gold">Sync</span> → <strong>"Importuj plik"</strong><br>
+        3. Wybierz pobrany plik<br>
+        4. Gotowe – masz te same dane!
+      </div>
+    </div>
+  </div>
+  
+  <div class="grid grid-2" style="margin-top:12px;">
+    <div class="card" style="border-color:var(--info);">
+      <div class="card-title">🏠 Pulpit</div>
+      <div style="font-size:12px;color:var(--muted);">
+        • Widzisz majątek rodziny i swój<br>
+        • Saldo konta i oszczędności<br>
+        • Pula rodzinna (wspólne pieniądze)<br>
+        • Szybkie akcje: dodaj członka, cel, kredyt, przelew
+      </div>
+    </div>
+    <div class="card" style="border-color:var(--info);">
+      <div class="card-title">👨‍👩‍👧‍👦 Rodzina</div>
+      <div style="font-size:12px;color:var(--muted);">
+        • Lista wszystkich członków<br>
+        • Dodawanie nowych (przycisk "+ Dodaj")<br>
+        • Przełączanie profilu ("👤 Przełącz")<br>
+        • Usuwanie członków ("🗑️") – tylko nie głowę!
+      </div>
+    </div>
+  </div>
+  
+  <div class="grid grid-2" style="margin-top:12px;">
+    <div class="card" style="border-color:var(--primary);">
+      <div class="card-title">📈 Inwestycje</div>
+      <div style="font-size:12px;color:var(--muted);">
+        • Kupno kryptowalut (BTC, ETH...)<br>
+        • Kupno akcji (PKO, Orlen, CD Projekt...)<br>
+        • Kupno surowców (złoto, ropa)<br>
+        • Widzisz wartość swojego portfela
+      </div>
+    </div>
+    <div class="card" style="border-color:var(--primary);">
+      <div class="card-title">🏛️ Rynek</div>
+      <div style="font-size:12px;color:var(--muted);">
+        • Aktualne ceny kryptowalut<br>
+        • Aktualne ceny akcji GPW<br>
+        • Ceny złota i ropy<br>
+        • Przycisk "Odśwież" aktualizuje notowania
+      </div>
+    </div>
+  </div>
+  
+  <div class="grid grid-2" style="margin-top:12px;">
+    <div class="card" style="border-color:var(--gold);">
+      <div class="card-title">🏦 Kredyty</div>
+      <div style="font-size:12px;color:var(--muted);">
+        • Weź kredyt (przycisk "+ Weź")<br>
+        • Widzisz kwotę, ratę, pozostało do spłaty<br>
+        • Status: spłacony / w trakcie<br>
+        • Spłacaj regularnie – scoring rośnie!
+      </div>
+    </div>
+    <div class="card" style="border-color:var(--gold);">
+      <div class="card-title">🛡️ Ubezpieczenia</div>
+      <div style="font-size:12px;color:var(--muted);">
+        • Kup ubezpieczenie: zdrowotne, auto, nieruchomości, życiowe<br>
+        • Chroni przed losowymi zdarzeniami<br>
+        • Miesięczna składka automatycznie pobierana
+      </div>
+    </div>
+  </div>
+  
+  <div class="grid grid-2" style="margin-top:12px;">
+    <div class="card" style="border-color:var(--danger);">
+      <div class="card-title">🧾 Rachunki</div>
+      <div style="font-size:12px;color:var(--muted);">
+        • Prąd, woda, internet, czynsz<br>
+        • Opłać przed końcem miesiąca!<br>
+        • Nieopłacone = kary i spadek scoringu
+      </div>
+    </div>
+    <div class="card" style="border-color:var(--danger);">
+      <div class="card-title">🎯 Cele</div>
+      <div style="font-size:12px;color:var(--muted);">
+        • Dodaj cel oszczędnościowy<br>
+        • Wpłacaj regularnie małe kwoty<br>
+        • Osiągnięcie celu = +10 do scoringu
+      </div>
+    </div>
+  </div>
+  
+  <div class="card" style="margin-top:12px;border-color:var(--gold);">
+    <div class="card-title">🏆 Osiągnięcia</div>
+    <div style="font-size:12px;color:var(--muted);">
+      Automatycznie odblokowujesz osiągnięcia:<br>
+      • 💎 Milioner w budowie – majątek > 100 000 PLN<br>
+      • 👑 Milioner – majątek > 1 000 000 PLN<br>
+      • 💼 Pracowity – 3 aktywne prace<br>
+      • 🐷 Oszczędny – oszczędności > 50 000 PLN<br>
+      • ⭐ Wiarygodny – scoring > 90<br>
+      • ₿ Krypto-ekspert – 5+ kryptowalut<br>
+      • 🎉 Bez długów – brak aktywnych kredytów
+    </div>
+  </div>
+  
+  <div class="card" style="margin-top:12px;border-color:var(--info);">
+    <div class="card-title">⌨️ Skróty klawiszowe (na komputerze)</div>
+    <div style="font-size:12px;color:var(--muted);">
+      • Ctrl+M – Przejdź miesiąc<br>
+      • Ctrl+N – Nowy cel<br>
+      • Ctrl+F – Nowy członek rodziny<br>
+      • Ctrl+L – Nowy kredyt<br>
+      • Ctrl+T – Przełącz motyw<br>
+      • Ctrl+W – Szybki podgląd majątku<br>
+      • Ctrl+1-9 – Przełącz widoki
+    </div>
+  </div>
+  
+  <div class="card" style="margin-top:12px;border-color:var(--gold);background:var(--gold-dim);">
+    <div class="card-title">💡 Złote zasady</div>
+    <div style="font-size:13px;color:var(--text);">
+      1. <strong>SYNC REGULARNIE</strong> – po każdej większej zmianie eksportuj plik i wysyłaj rodzeństwu<br>
+      2. <strong>OSZCZĘDZAJ</strong> – wpłacaj na cele i PPK, rząd dopłaca 50% do 500 PLN!<br>
+      3. <strong>SPŁACAJ KREDYTY</strong> – punktualnie, żeby scoring rósł<br>
+      4. <strong>INWESTUJ</strong> – krypto, akcje, złoto – dywersyfikuj!<br>
+      5. <strong>NIE PANIKUJ</strong> – rynek ma wzloty i upadki, to normalne<br>
+      6. <strong>BAW SIĘ DOBRZE</strong> – to gra, nie stresuj się!
+    </div>
+  </div>
+  `;
+  
+  content.innerHTML = html;
+}
+
+// ===== DODANIE SAMOUCZKA DO NAWIGACJI =====
+function addTutorialNav(){
+  const navContainer = document.getElementById('navContainer');
+  const settingsItem = navContainer.querySelector('.nav-item[data-view="settings"]');
+  
+  if(settingsItem){
+    const newItem = document.createElement('div');
+    newItem.className = 'nav-item';
+    newItem.dataset.view = 'tutorial';
+    newItem.innerHTML = '📖 <span class="nav-label">Samouczek</span>';
+    newItem.addEventListener('click', function(){
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      this.classList.add('active');
+      renderTutorialView();
+    });
+    settingsItem.parentNode.insertBefore(newItem, settingsItem);
+  }
+}
+
+// ===== DODANIE DO MOBILNEJ NAWIGACJI =====
+function addTutorialMobileNav(){
+  const bottomNav = document.getElementById('mobileBottomNav');
+  if(!bottomNav) return;
+  
+  const newItem = document.createElement('div');
+  newItem.className = 'nav-item';
+  newItem.dataset.view = 'tutorial';
+  newItem.innerHTML = '<span class="nav-icon">📖</span><span>Poradnik</span>';
+  newItem.addEventListener('click', function(){
+    const allItems = document.querySelectorAll('.mobile-bottom-nav .nav-item, .sidebar .nav-item');
+    allItems.forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+    // Zaznacz też w sidebarze
+    document.querySelectorAll('.sidebar .nav-item').forEach(n => {
+      if(n.dataset.view === 'tutorial') n.classList.add('active');
+    });
+    renderTutorialView();
+  });
+  
+  // Wstaw przed ostatnim
+  const lastItem = bottomNav.lastElementChild;
+  bottomNav.insertBefore(newItem, lastItem);
+}
+
+// ===== NADPISANIE INICJALIZACJI =====
+const originalAddExtraNav = window.addExtraNav || function(){};
+window.addExtraNav = function(){
+  originalAddExtraNav();
+  addTutorialNav();
+  addTutorialMobileNav();
+};
+
+// Uruchom po załadowaniu
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    addTutorialNav();
+    addTutorialMobileNav();
+  }, 100);
+});
+
+console.log('📖 Samouczek dodany!');
 </script>
 </body>
 </html>
