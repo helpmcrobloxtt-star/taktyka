@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Bank Pro – Moduł Rodziny</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0E1A;--panel:rgba(255,255,255,0.045);--panel-solid:#121729;
+    --panel-border:rgba(255,255,255,0.08);--primary:#10B981;--primary-dim:rgba(16,185,129,0.15);
+    --gold:#F0B93F;--danger:#EF4444;--text:#E7ECF3;--muted:#8B96AB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;padding:24px;min-height:100vh;}
+  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;border-bottom:1px solid var(--panel-border);padding-bottom:16px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:24px;color:#fff;}
+  .back-btn{background:var(--panel);color:var(--text);border:1px solid var(--panel-border);padding:8px 16px;border-radius:999px;text-decoration:none;font-size:13px;font-weight:600;}
+  .grid{display:grid;grid-template-columns:1fr 2fr;gap:20px;}
+  @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--panel-solid);border:1px solid var(--panel-border);border-radius:16px;padding:20px;margin-bottom:16px;}
+  .card-title{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;}
+  .value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;}
+  .btn{background:var(--primary);color:#04140D;border:none;padding:10px 16px;border-radius:999px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;}
+  .btn-danger{background:var(--danger);color:#fff;}
+  select, input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--panel-border);background:var(--bg);color:var(--text);margin-top:6px;margin-bottom:12px;outline:none;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;}
+  th, td{padding:10px;text-align:left;border-bottom:1px solid var(--panel-border);}
+  th{color:var(--muted);font-size:11px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>👨‍👩‍👧‍👦 Zaawansowany Moduł Rodziny</h1>
+  <a href="index.html" class="back-btn">← Powrót do Głównego Menu</a>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-title"><span>Aktywny domownik</span></div>
+      <select id="activeMemberSelect" onchange="switchFamilyMember(this.value)"></select>
+      <div class="value" id="memberBalance">0.00 zł</div>
+      <p style="font-size:12px;color:var(--muted);margin-top:6px;">Oszczędności: <b id="memberSavings">0.00 zł</b></p>
+      <button class="btn" onclick="addFunds(200)">+ Wpłać 200 zł kieszonkowego</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Dodaj członka rodziny</span></div>
+      <label style="font-size:12px;color:var(--muted)">Imię i Rola</label>
+      <input type="text" id="newMemberName" placeholder="np. Zosia (Córka)">
+      <button class="btn" onclick="createNewMember()">+ Dodaj do bazy</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title"><span>Wszyscy domownicy i ich budżety</span></div>
+      <table>
+        <thead><tr><th>Imię / Rola</th><th>Saldo</th><th>Akcja</th></tr></thead>
+        <tbody id="familyTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Historia finansowa rodziny</span></div>
+      <table>
+        <thead><tr><th>Kategoria</th><th>Kwota</th><th>Opis</th></tr></thead>
+        <tbody id="familyHistoryBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'apexFamilyModuleDB_v2';
+let familyData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+  activeId: 'u_1',
+  members: {
+    'u_1': {id:'u_1', name:'Adam (Głowa rodziny)', balance:4500, savings:1200, history:[]},
+    'u_2': {id:'u_2', name:'Anna (Małżonka)', balance:3200, savings:2500, history:[]}
+  }
+};
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(familyData));
+  renderAll();
+}
+
+function switchFamilyMember(id){
+  familyData.activeId = id;
+  saveState();
+}
+
+function createNewMember(){
+  const name = document.getElementById('newMemberName').value.trim();
+  if(!name) return alert('Wpisz imię członka rodziny!');
+  const id = 'u_' + Date.now();
+  familyData.members[id] = {id, name, balance:1000, savings:300, history:[]};
+  document.getElementById('newMemberName').value = '';
+  familyData.activeId = id;
+  saveState();
+}
+
+function removeMember(id){
+  if(Object.keys(familyData.members).length <= 1) return alert('Musisz zostawić chociaż jednego członka rodziny!');
+  delete familyData.members[id];
+  familyData.activeId = Object.keys(familyData.members)[0];
+  saveState();
+}
+
+function addFunds(amt){
+  const m = familyData.members[familyData.activeId];
+  m.balance += amt;
+  m.history.unshift({category:'Wpływ', amount:amt, desc:'Kieszonkowe / Wpłata domowa'});
+  saveState();
+}
+
+function renderAll(){
+  const sel = document.getElementById('activeMemberSelect');
+  sel.innerHTML = '';
+  const tbody = document.getElementById('familyTableBody');
+  tbody.innerHTML = '';
+  const histBody = document.getElementById('familyHistoryBody');
+  histBody.innerHTML = '';
+
+  Object.values(familyData.members).forEach(m => {
+    // Select options
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.name;
+    if(m.id === familyData.activeId) opt.selected = true;
+    sel.appendChild(opt);
+
+    // Table rows
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><b>${m.name}</b></td><td>${m.balance.toFixed(2)} zł</td><td><button class="btn btn-danger" style="width:auto;padding:4px 10px;margin:0" onclick="removeMember('${m.id}')">Usuń</button></td>`;
+    tbody.appendChild(tr);
+
+    // History
+    if(m.id === familyData.activeId){
+      document.getElementById('memberBalance').textContent = m.balance.toFixed(2) + ' zł';
+      document.getElementById('memberSavings').textContent = m.savings.toFixed(2) + ' zł';
+      m.history.forEach(h => {
+        const htr = document.createElement('tr');
+        htr.innerHTML = `<td>${h.category}</td><td style="color:var(--primary)">+${h.amount} zł</td><td>${h.desc}</td>`;
+        histBody.appendChild(htr);
+      });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', renderAll);
+</script>
+
+</body>
+</html>
