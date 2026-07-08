@@ -30,7 +30,7 @@
     display: flex;
     justify-content: center;
   }
-  .wrapper { max-width: 900px; width: 100%; }
+  .wrapper { max-width: 1000px; width: 100%; }
   
   /* HEADER */
   header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; border-bottom: 1px solid var(--panel-border); padding-bottom: 16px; }
@@ -51,15 +51,14 @@
   
   /* CARDS & GRID */
   .grid { display: grid; gap: 16px; }
-  .grid-2 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(3, 1fr); }
-  @media(max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  @media(max-width: 900px) { .grid-3 { grid-template-columns: 1fr; } }
   
   .card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 18px; padding: 24px; backdrop-filter: blur(12px); transition: .2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; }
   .card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
   .card-icon { font-size: 36px; margin-bottom: 14px; }
-  .card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-  .card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .card p { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
   
   .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 16px; align-self: flex-start; }
   .badge.green { background: var(--primary-dim); color: var(--primary); }
@@ -89,9 +88,9 @@
   <div id="gamesView" class="view active">
     <div style="margin-bottom: 20px;">
       <h2 style="font-family:'Space Grotesk',sans-serif; font-size:22px; margin-bottom:4px;">Wybierz moduł rozgrywki</h2>
-      <p style="font-size:13px; color:var(--muted);">Uruchom wybraną podstronę symulatora finansowego.</p>
+      <p style="font-size:13px; color:var(--muted);">Uruchom wybraną podstronę symulatora lub terminala.</p>
     </div>
-    <div class="grid grid-2">
+    <div class="grid grid-3">
       <a href="rodzina.html" class="card">
         <div>
           <div class="card-icon">👨‍👩‍👧‍👦</div>
@@ -104,59 +103,53 @@
       <a href="pilka.html" class="card">
         <div>
           <div class="card-icon">⚽</div>
-          <h3>Premier League Manager RP</h3>
-          <p>Rozbudowany symulator menedżerski z 20 zespołami Premier League, taktyką w stylu FIFA, budżetem i statystykami z bazy.</p>
+          <h3>Premier League Manager</h3>
+          <p>Rozbudowany symulator menedżerski z 20 zespołami, taktyką, budżetem i statystykami kadry. Aktualnie jest zamknięty, ale za niedługo powinien sie otworzyć!</p>
         </div>
         <span class="badge blue">Moduł RP / Mecz</span>
       </a>
-      
-      <div class="card" style="opacity: 0.6; cursor: not-allowed;">
+
+      <a href="cyber.html" class="card">
         <div>
-          <div class="card-icon">📈</div>
-          <h3>Giełda i Inwestycje (Wkrótce)</h3>
-          <p>Handluj akcjami i krypto na żywo. Moduł w fazie przygotowania przez dewelopera.</p>
+          <div class="card-icon">💻</div>
+          <h3>Cyber-Core Breach</h3>
+          <p>Interaktywny system włamań do rdzeni danych (Neural Overload). Przejmij kontrolę nad matrycą.</p>
         </div>
-        <span class="badge orange">Zablokowane</span>
-      </div>
+        <span class="badge orange" style="background:var(--gold-dim); color:var(--gold)">Nowość HUD</span>
+      </a>
     </div>
   </div>
 
   <div id="tutorialView" class="view">
     <div style="margin-bottom: 20px;">
       <h2 style="font-family:'Space Grotesk',sans-serif; font-size:22px; margin-bottom:4px;">Jak korzystać z Apex Bank Pro?</h2>
-      <p style="font-size:13px; color:var(--muted);">Szybki przewodnik, żeby ogarnąć finanse i zaimponować starszyźnie!</p>
+      <p style="font-size:13px; color:var(--muted);">Szybki przewodnik po dostępnych systemach w hubie!</p>
     </div>
     
     <div class="tuto-box">
-      <h4>1. Cel gry w Moduł Rodziny i Symulator RP</h4>
-      <p>W module rodzinnym dbasz o budżet domowy, a w module <b>Premier League Manager RP</b> przejmujesz stery nad wybranym klubem, ustalasz taktykę (szerokość, głębokość, styl), sprawdzasz tabelę ligową z pliku i symulujesz mecze kolejka po kolejce.</p>
+      <h4>1. Moduł Rodziny i Premier League</h4>
+      <p>W module rodzinnym dbasz o płynność finansową domowników, a w Premier League sterujesz klubem i taktyką meczową.</p>
     </div>
     
     <div class="tuto-box">
-      <h4>2. Jak się poruszać po systemie?</h4>
-      <p>Kliknij w zakładkę „Wybór Gier” u góry i wejdź do wybranego modułu – np. <b>Moduł Rodziny</b> (`rodzina.html`) lub <b>Premier League Manager RP</b> (`pilka.html`). Wszystko działa bezpośrednio w przeglądarce przy użyciu lokalnych plików danych!</p>
+      <h4>2. Cyber-Core Breach (Nowość)</h4>
+      <p>Szybka gra zręcznościowa polegająca na przełamywaniu węzłów matrycy systemowej i zbieraniu data-kredytów.</p>
     </div>
 
     <div class="tuto-box">
-      <h4>3. Zasada złotej gotówki</h4>
-      <p>Nie wydawaj wszystkiego na raz – oszczędzaj wspólnie z domownikami albo inwestuj w transfery wybranego zespołu Premier League.</p>
+      <h4>3. Nawigacja</h4>
+      <p>Wszystkie pliki (`rodzina.html`, `pilka.html`, `cyber.html`) działają lokalnie i wracają płynnie do tego panelu głównego.</p>
     </div>
   </div>
 </div>
 
 <script>
-  function switchTab(tabName, el) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
-    
-    el.classList.add('active');
-    if(tabName === 'games') {
-      document.getElementById('gamesView').classList.add('active');
-    } else {
-      document.getElementById('tutorialView').classList.add('active');
-    }
+  function switchTab(tabName, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(tabName + 'View').classList.add('active');
   }
 </script>
-
 </body>
 </html>
