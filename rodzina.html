@@ -324,6 +324,93 @@ function renderAll() {
 }
 
 document.addEventListener('DOMContentLoaded', renderAll);
+<!-- Dodaj te nowe sekcje wewnątrz Twojego istniejącego pliku -->
+
+<!-- 1. PANEL EDYCJI PRACY (zamiast prompta) -->
+<div class="card">
+  <div class="card-title"><span>Konfiguracja Pracy</span></div>
+  <input type="text" id="jobTitle" placeholder="Nazwa zawodu">
+  <input type="number" id="jobSalary" placeholder="Miesięczna wypłata (netto)">
+  <button class="btn btn-gold" onclick="updateJob()">Zapisz zawód i zarobki</button>
+</div>
+
+<!-- 2. PANEL PRZELEWÓW I WYDATKÓW -->
+<div class="card">
+  <div class="card-title"><span>Operacje Finansowe</span></div>
+  <select id="transferTarget">
+    <option value="shop">🛒 Zakupy / Wydatki (Skarbiec)</option>
+    <!-- Opcje domowników zostaną wygenerowane przez JS -->
+  </select>
+  <input type="number" id="transferAmt" placeholder="Kwota operacji">
+  <button class="btn" onclick="makeTransfer()">Wykonaj przelew / Wydatek</button>
+</div>
+
+// --- FUNKCJE DODATKOWE ---
+
+// Funkcja cooldownu (blokada przycisku)
+let isProcessing = false;
+function advanceMonth() {
+  if(isProcessing) return;
+  isProcessing = true;
+  
+  const btn = event.target;
+  btn.textContent = "Symuluję...";
+  btn.style.opacity = "0.5";
+
+  // Logika miesiąca...
+  setTimeout(() => {
+    // Tutaj Twoja istniejąca logika naliczania pensji i krypto
+    simState.month++;
+    saveAndRender();
+    
+    isProcessing = false;
+    btn.textContent = "⏩ Przejdź o 1 miesiąc";
+    btn.style.opacity = "1";
+    showToast("Miesiąc zakończony!");
+  }, 3000); // 3 sekundy cooldownu
+}
+
+function updateJob() {
+  const m = simState.members[simState.activeId];
+  const title = document.getElementById('jobTitle').value;
+  const sal = parseFloat(document.getElementById('jobSalary').value);
+  if(!title || isNaN(sal)) return alert("Uzupełnij poprawnie dane!");
+  
+  m.job = title;
+  m.salary = sal;
+  saveAndRender();
+  showToast("Zaktualizowano dane zawodowe!");
+}
+
+function makeTransfer() {
+  const target = document.getElementById('transferTarget').value;
+  const amt = parseFloat(document.getElementById('transferAmt').value);
+  const sender = simState.members[simState.activeId];
+  
+  if(isNaN(amt) || amt <= 0 || sender.balance < amt) return alert("Brak środków!");
+  
+  sender.balance -= amt;
+  if(target === 'shop') {
+    simState.familyPool += amt;
+    showToast("Wydatki zaksięgowane w skarbcu!");
+  } else {
+    simState.members[target].balance += amt;
+    showToast(`Przelano ${amt} zł do ${simState.members[target].name}`);
+  }
+  saveAndRender();
+}
+
+// Zaktualizuj renderAll, aby dodawał domowników do selecta przelewów
+function renderAll() {
+  // ... (reszta Twojego kodu renderAll)
+  const targetSel = document.getElementById('transferTarget');
+  targetSel.innerHTML = '<option value="shop">🛒 Zakupy / Wydatki (Skarbiec)</option>';
+  Object.values(simState.members).forEach(m => {
+    if(m.id !== simState.activeId) {
+      targetSel.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+    }
+  });
+}
 </script>
 
 </body>
