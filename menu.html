@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Bank Pro – Wybór Modułu</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body{background:#0A0E1A;color:#E7ECF3;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;}
+  .container{max-width:700px;width:100%;text-align:center;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:28px;margin-bottom:8px;color:#fff;}
+  p{color:#8B96AB;margin-bottom:32px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  @media(max-width:600px){.grid{grid-template-columns:1fr;}}
+  .card{background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;text-decoration:none;color:#E7ECF3;display:flex;flex-direction:column;align-items:center;gap:12px;transition:.2s;}
+  .card:hover{background:rgba(255,255,255,0.08);border-color:#10B981;transform:translateY(-2px);}
+  .icon{font-size:36px;}
+  .title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;}
+  .desc{font-size:12px;color:#8B96AB;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Apex Bank Pro – Centrum Gry</h1>
+  <p>Wybierz podstronę, do której chcesz przejść:</p>
+  <div class="grid">
+    <a href="rodzina.html" class="card">
+      <span class="icon">👨‍👩‍👧‍👦</span>
+      <span class="title">Moduł Rodziny</span>
+      <span class="desc">Zarządzaj budżetem, członkami i rolami domowników.</span>
+    </a>
+    <a href="#" class="card" onclick="alert('Kolejna mini-gra / moduł w przygotowaniu!')">
+      <span class="icon">📈</span>
+      <span class="title">Giełda i Inwestycje</span>
+      <span class="desc">Handluj kryptowalutami i akcjami na żywo.</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>
